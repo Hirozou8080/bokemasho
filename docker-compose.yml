@@ -1,0 +1,106 @@
+version: "3"
+
+services:
+  next-laravel-frontend:
+    build:
+      context: .
+      dockerfile: ./docker/node/Dockerfile
+    container_name: next-laravel-frontend
+    volumes:
+      - ./src/frontend:/app
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+    ports:
+      - "${IP}:3000:3000"
+    tty: true
+
+  next-laravel-backend:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    container_name: next-laravel-backend
+    volumes:
+      - ./src/backend:/app
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+      - ./cron:/usr/log/cron
+    ports:
+      - "${IP}:8080:8080"
+    tty: true
+
+  next-laravel-nginx:
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    container_name: next-laravel_web
+    ports:
+      - "${IP}:80:80"
+    environment:
+      - TZ=Asia/Tokyo
+    volumes:
+      - ./src:/src
+      - ./nginx_log/:/var/log/nginx
+
+  next-laravel_db:
+    build: ./docker/mysql
+    volumes:
+      - db-store_next-laravel:/var/lib/mysql
+    ports:
+      - "${IP}:3306:3306"
+    environment:
+      TZ: Asia/Tokyo
+    container_name: next-laravel_db
+
+  next-laravel-phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=next-laravel_db
+      - PMA_USER=hiro
+      - PMA_PASSWORD=pass
+    ports:
+      - "${IP}:4400:80"
+    depends_on:
+      - next-laravel_db
+    container_name: next-laravel_phpmyadmin
+
+  next-laravel_db_test:
+    build: ./docker/mysql-test
+    volumes:
+      - db-store_next-laravel_test:/var/lib/mysql
+    ports:
+      - "${IP}:3307:3306"
+    environment:
+      TZ: Asia/Tokyo
+    container_name: next-laravel_db_test
+
+  next-laravel-phpmyadmin_test:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=next-laravel_db_test
+      - PMA_USER=hiro
+      - PMA_PASSWORD=pass
+    ports:
+      - "${IP}:8889:80"
+    depends_on:
+      - next-laravel_db_test
+    container_name: next-laravel_phpmyadmin_test
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "${IP}:8025:8025"
+    container_name: next-laravel_mailhog
+
+  ngrok:
+    container_name: next-laravel_ngrok
+    image: wernight/ngrok:latest
+    ports:
+      - "${IP}:4040:4040"
+    environment:
+      NGROK_AUTH: ${NGROKAUTH}
+      NGROK_PROTOCOL: http
+      NGROK_PORT: next-laravel-frontend:3000
+
+volumes:
+  db-store_next-laravel:
+  db-store_next-laravel_test:

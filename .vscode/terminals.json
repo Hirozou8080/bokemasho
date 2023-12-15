@@ -1,0 +1,40 @@
+{
+  "autorun": true,
+  "terminals": [
+    {
+      "name": "フロントエンドホスト",
+      "description": "フロントエンドホスト",
+      "open": true,
+      "focus": true,
+      "command": "cd src/frontend"
+    },
+    {
+      "name": "フロントエンドコンテナ",
+      "description": "フロントエンドコンテナ",
+      "open": true,
+      "commands": [
+        "docker exec -it next-laravel-frontend bash",
+        "yarn install",
+        "yarn dev"
+      ]
+    },
+    {
+      "name": "バックエンドホスト",
+      "description": "バックエンドホスト",
+      "open": true,
+      "focus": true,
+      "command": "cd src/backend"
+    },
+    {
+      "name": "バックエンドコンテナ",
+      "description": "バックエンドコンテナ",
+      "open": true,
+      "commands": [
+        "docker exec -it next-laravel-backend bash",
+        "composer update",
+        "php artisan migrate",
+        "php artisan serve --port=8080 --host=0.0.0.0"
+      ]
+    }
+  ]
+}

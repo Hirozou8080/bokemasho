@@ -1,0 +1,257 @@
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+  2023-12-15 12:30:01 Running ['artisan' create:analytics_setup]  1,174ms DONE
+  ⇂ '/usr/local/bin/php' 'artisan' create:analytics_setup > '/dev/null' 2>&1  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+  2023-12-15 12:40:01 Running ['artisan' create:analytics_setup]  1,666ms DONE
+  ⇂ '/usr/local/bin/php' 'artisan' create:analytics_setup > '/dev/null' 2>&1  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+  2023-12-15 12:50:01 Running ['artisan' create:analytics_setup] .. 838ms DONE
+  ⇂ '/usr/local/bin/php' 'artisan' create:analytics_setup > '/dev/null' 2>&1  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+  2023-12-15 13:00:02 Running ['artisan' create:analytics_setup] .. 878ms DONE
+  ⇂ '/usr/local/bin/php' 'artisan' create:analytics_setup > '/dev/null' 2>&1  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+
+   INFO  No scheduled commands are ready to run.  
+
+/bin/sh: 1: php: not found
+/bin/sh: 1: php: not found
+/bin/sh: 1: php: not found
+/bin/sh: 1: php: not found
+/bin/sh: 1: php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
+/bin/sh: 1: usr/local/bin/php: not found
