@@ -1,0 +1,740 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+html,
+body {
+  height: 100%;
+  font-family: "Noto Serif Japanese", serif, sans-serif;
+}
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+#root,
+#__next {
+  isolation: isolate;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+  cursor: default;
+}
+::before,
+::after {
+  box-sizing: inherit;
+}
+html {
+  scroll-behavior: smooth;
+  font-size: 62.5%;
+}
+button {
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  vertical-align: middle;
+  text-align: inherit;
+  font: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* font設定 */
+@font-face {
+  font-family: "Noto Sans JP";
+  font-style: normal;
+  font-weight: 100;
+  src: url(/fonts/NotoSansCJKjp-Thin.woff) format("woff"),
+    url(/fonts/NotoSansCJKjp-Thin.otf) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Sans JP";
+  font-style: normal;
+  font-weight: 200;
+  src: url(/fonts/NotoSansCJKjp-Light.woff) format("woff"),
+    url(/fonts/NotoSansCJKjp-Light.otf) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Sans JP";
+  font-style: normal;
+  font-weight: 300;
+  src: url(/fonts/NotoSansCJKjp-DemiLight.woff) format("woff"),
+    url(/fonts/NotoSansCJKjp-DemiLight.otf) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Sans JP";
+  font-style: normal;
+  font-weight: 400;
+  src: url(/fonts/NotoSansCJKjp-Regular.woff) format("woff"),
+    url(/fonts/NotoSansCJKjp-Regular.otf) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Sans JP";
+  font-style: normal;
+  font-weight: 500;
+  src: url(/fonts/NotoSansCJKjp-Medium.woff) format("woff"),
+    url(/fonts/NotoSansCJKjp-Medium.otf) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Sans JP";
+  font-style: normal;
+  font-weight: 700;
+  src: url(/fonts/NotoSansCJKjp-Bold.woff) format("woff"),
+    url(/fonts/NotoSansCJKjp-Bold.otf) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Sans JP";
+  font-style: normal;
+  font-weight: 900;
+  src: url(/fonts/NotoSansCJKjp-Black.woff) format("woff"),
+    url(/fonts/NotoSansCJKjp-Black.otf) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Serif JP";
+  font-weight: normal;
+  font-weight: 100;
+  src: url(/fonts/NotoSerifCJKjp-ExtraLight.woff) format("woff"),
+    url(/fonts/NotoSerifCJKjp-ExtraLight.otf) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Serif JP";
+  font-weight: normal;
+  font-weight: 200;
+  src: url(/fonts/NotoSerifCJKjp-Light.woff) format("woff"),
+    url(/fonts/NotoSerifCJKjp-Light.otf) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Serif JP";
+  font-weight: normal;
+  font-weight: 300;
+  src: url(/fonts/NotoSerifCJKjp-Regular.otf) format("woff"),
+    url(/fonts/NotoSerifCJKjp-Regular.woff) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Serif JP";
+  font-weight: normal;
+  font-weight: 400;
+  src: url(/fonts/NotoSerifCJKjp-Medium.otf) format("woff"),
+    url(/fonts/NotoSerifCJKjp-Medium.otf) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Serif JP";
+  font-weight: normal;
+  font-weight: 600;
+  src: url(/fonts/NotoSerifCJKjp-SemiBold.otf) format("woff"),
+    url(/fonts/NotoSerifCJKjp-SemiBold.woff) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Serif JP";
+  font-weight: normal;
+  font-weight: 700;
+  src: url(/fonts/NotoSerifCJKjp-Bold.otf) format("woff"),
+    url(/fonts/NotoSerifCJKjp-Bold.woff) format("opentype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Serif JP";
+  font-weight: normal;
+  font-weight: 900;
+  src: url(/fonts/NotoSerifCJKjp-Black.otf) format("woff"),
+    url(/fonts/NotoSerifCJKjp-Black.woff) format("opentype");
+  font-display: swap;
+}
+
+.font-sans {
+  font-family: "Noto Sans JP" !important;
+}
+.font-serif {
+  font-family: "Noto Serif JP" !important;
+}
+
+/* メインカラー */
+.blue {
+  color: #3989c2;
+}
+.orange {
+  color: #f15a24;
+}
+
+/* レスポンシブ */
+.pc {
+  display: none !important;
+}
+.sp {
+  display: none !important;
+}
+
+/* Buttonアイテム */
+.button-align-left {
+  width: 100%;
+  margin: 2rem 0;
+  text-align: left;
+}
+
+.button-align-center {
+  width: 100%;
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.button-align-right {
+  width: 100%;
+  margin: 2rem 0;
+  text-align: right;
+}
+
+.button-radius-10 {
+  border-radius: 10px;
+}
+
+.button-radius-20 {
+  border-radius: 20px;
+}
+
+/* Typography */
+.nowrap {
+  white-space: nowrap;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.align-left {
+  text-align: left;
+}
+
+/* flexアイテム */
+.flex-start {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.flex-end {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.flex-around {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-align-items-stretch {
+  align-items: stretch;
+}
+
+.flex-align-items-center {
+  align-items: center;
+}
+
+.flex-align-items-start {
+  align-items: start;
+}
+
+.flex-align-items-end {
+  align-items: flex-end;
+}
+
+.flex-nogap {
+  gap: 0;
+}
+.flex-gap-10 {
+  gap: 10px;
+}
+.flex-gap-20 {
+  gap: 20px;
+}
+.flex-gap-30 {
+  gap: 30px;
+}
+.flex-gap-40 {
+  gap: 40px;
+}
+.flex-gap-50 {
+  gap: 50px;
+}
+.flex-gap-60 {
+  gap: 60px;
+}
+.flex-gap-70 {
+  gap: 70px;
+}
+.flex-gap-80 {
+  gap: 80px;
+}
+.flex-gap-90 {
+  gap: 90px;
+}
+.flex-gap-100 {
+  gap: 100px;
+}
+
+.flex-wrap-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-wrap-nowrap {
+  flex-wrap: nowrap;
+}
+
+.flex-wrap-reverse {
+  flex-wrap: wrap-reverse;
+}
+
+.flex-direction-row-reverse {
+  flex-direction: row-reverse;
+}
+
+/* 1200px以下の場合 [タブレット + SP] */
+@media screen and (max-width: 1200px) {
+}
+
+/* 768px以下の場合 [SP のみ]*/
+@media screen and (max-width: 768px) {
+  /* レスポンシブ */
+  .pc {
+    display: none !important;
+  }
+  .no-sp {
+    display: none !important;
+  }
+  .sp {
+    display: block !important;
+  }
+
+  /* flexアイテム */
+  .flex-start-sp {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flex-center-sp {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flex-end-sp {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .flex-around-sp {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flex-between-sp {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flex-align-items-stretch-sp {
+    align-items: stretch;
+  }
+
+  .flex-align-items-center-sp {
+    align-items: center;
+  }
+
+  .flex-align-items-start-sp {
+    align-items: flex-start;
+  }
+
+  .flex-align-items-end-sp {
+    align-items: flex-end;
+  }
+
+  .flex-nogap-sp {
+    gap: 0;
+  }
+  .flex-nogap-sp {
+    gap: 0;
+  }
+
+  .flex-gap-10-sp {
+    gap: 10px;
+  }
+  .flex-gap-20-sp {
+    gap: 20px;
+  }
+  .flex-gap-30-sp {
+    gap: 30px;
+  }
+  .flex-gap-40-sp {
+    gap: 40px;
+  }
+  .flex-gap-50-sp {
+    gap: 50px;
+  }
+  .flex-gap-60-sp {
+    gap: 60px;
+  }
+  .flex-gap-70-sp {
+    gap: 70px;
+  }
+  .flex-gap-80-sp {
+    gap: 80px;
+  }
+  .flex-gap-90-sp {
+    gap: 90px;
+  }
+  .flex-gap-100-sp {
+    gap: 100px;
+  }
+
+  .button-align-left-sp {
+    width: 100%;
+    margin: 2rem 0;
+    text-align: left;
+  }
+
+  .button-align-center-sp {
+    width: 100%;
+    margin: 2rem 0;
+    text-align: center;
+  }
+
+  .button-align-right-sp {
+    width: 100%;
+    margin: 2rem 0;
+    text-align: right;
+  }
+}
+
+/* 768px以上の場合 [タブレット + PC]*/
+@media screen and (min-width: 768px) {
+  /* レスポンシブ */
+  .no-sp {
+    display: block !important;
+  }
+  .sp {
+    display: none !important;
+  }
+
+  .flex-start-tab-pc {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flex-center-tab-pc {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flex-end-tab-pc {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .flex-around-tab-pc {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flex-between-tab-pc {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flex-align-items-stretch-tab-pc {
+    align-items: stretch;
+  }
+
+  .flex-align-items-center-tab-pc {
+    align-items: center;
+  }
+
+  .flex-align-items-start-tab-pc {
+    align-items: flex-start;
+  }
+
+  .flex-align-items-end-tab-pc {
+    align-items: flex-end;
+  }
+
+  .flex-wrap-nowrap-tab-pc {
+    flex-wrap: nowrap;
+  }
+
+  .flex-nogap-tab-pc {
+    gap: 0;
+  }
+
+  .flex-gap-10-tab-pc {
+    gap: 10px;
+  }
+  .flex-gap-20-tab-pc {
+    gap: 20px;
+  }
+  .flex-gap-30-tab-pc {
+    gap: 30px;
+  }
+  .flex-gap-40-tab-pc {
+    gap: 40px;
+  }
+  .flex-gap-50-tab-pc {
+    gap: 50px;
+  }
+  .flex-gap-60-tab-pc {
+    gap: 60px;
+  }
+  .flex-gap-70-tab-pc {
+    gap: 70px;
+  }
+  .flex-gap-80-tab-pc {
+    gap: 80px;
+  }
+  .flex-gap-90-tab-pc {
+    gap: 90px;
+  }
+  .flex-gap-100-tab-pc {
+    gap: 100px;
+  }
+
+  .flex-wrap-wrap-tab-pc {
+    flex-wrap: wrap;
+  }
+
+  .flex-wrap-nowrap-tab-pc {
+    flex-wrap: nowrap;
+  }
+
+  .flex-wrap-reverse-tab-pc {
+    flex-wrap: wrap-reverse;
+  }
+
+  .flex-direction-row-reverse-tab-pc {
+    flex-direction: row-reverse;
+  }
+}
+
+/* 1200px以上の場合 [PC のみ]*/
+@media screen and (min-width: 1200px) {
+  /* レスポンシブ */
+  .pc {
+    display: block !important;
+  }
+  .sp {
+    display: none !important;
+  }
+  .no-pc {
+    display: none !important;
+  }
+
+  /* flex */
+  .flex-start-pc {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flex-center-pc {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flex-end-pc {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .flex-around-pc {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .flex-between-pc {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .flex-align-items-stretch-pc {
+    align-items: stretch;
+  }
+
+  .flex-align-items-center-pc {
+    align-items: center;
+  }
+
+  .flex-align-items-start-pc {
+    align-items: flex-start;
+  }
+
+  .flex-align-items-end-pc {
+    align-items: flex-end;
+  }
+
+  .flex-nogap-pc {
+    gap: 0;
+  }
+  .flex-gap-10-pc {
+    gap: 10px;
+  }
+  .flex-gap-20-pc {
+    gap: 20px;
+  }
+  .flex-gap-30-pc {
+    gap: 30px;
+  }
+  .flex-gap-40-pc {
+    gap: 40px;
+  }
+  .flex-gap-50-pc {
+    gap: 50px;
+  }
+  .flex-gap-60-pc {
+    gap: 60px;
+  }
+  .flex-gap-70-pc {
+    gap: 70px;
+  }
+  .flex-gap-80-pc {
+    gap: 80px;
+  }
+  .flex-gap-90-pc {
+    gap: 90px;
+  }
+  .flex-gap-100-pc {
+    gap: 100px;
+  }
+  .flex-wrap-wrap-pc {
+    flex-wrap: wrap;
+  }
+
+  .flex-wrap-nowrap-pc {
+    flex-wrap: nowrap;
+  }
+
+  .flex-wrap-reverse-pc {
+    flex-wrap: wrap-reverse;
+  }
+
+  .flex-direction-row-reverse-pc {
+    flex-direction: row-reverse;
+  }
+}
