@@ -5,6 +5,8 @@ use Illuminate\Support\ServiceProvider;
 
 return [
 
+    'frontend_url' => env('FRONTEND_URL', null),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name

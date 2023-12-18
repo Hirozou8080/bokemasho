@@ -32,14 +32,20 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app'),
+            'root' => config('app.drive') ? config('app.drive') : storage_path('app'),
+            'throw' => false,
+        ],
+
+        'test' => [
+            'driver' => 'local',
+            'root' => config('app.drive') ? config('app.drive') . '/test' : storage_path('test'),
             'throw' => false,
         ],
 
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
             'throw' => false,
         ],
