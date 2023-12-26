@@ -1,3 +1,6 @@
 .node_repl_history
 
+nginx_log/*
+
 .env
+src/frontend/.cache/
