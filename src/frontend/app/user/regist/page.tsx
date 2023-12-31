@@ -1,8 +1,8 @@
-import Login from '@/app/components/Login';
+import Regist from '@/app/components/user/Regist';
 const Page = () => {
   return (
     <div>
-      <Login />
+      <Regist />
     </div>
   );
 }
