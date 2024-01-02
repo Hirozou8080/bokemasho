@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, {  useState } from 'react';
 import axios from 'axios';
 
 // XSRF-TOKENをリクエスト時に送信するための設定
@@ -9,7 +9,7 @@ const http = axios.create({
 });
 
 const Login = () => {
-    const [email, setEmail] = useState('');
+    const [userName, setUserName] = useState('');
     const [password, setPassword] = useState('');
 
     const postData = async () => {
@@ -18,7 +18,7 @@ const Login = () => {
          .then((res: any) => {
             console.log(res);
             // ログイン処理
-            http.post('/api/login', {email, password}).then((res: any) => {
+            http.post('/api/login', {userName, password}).then((res: any) => {
                 console.log(res);
             })
         });
@@ -29,9 +29,9 @@ const Login = () => {
             <input
                 type="text"
                 className='bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500 m-3 max-w-sm'
-                placeholder='email'
+                placeholder='User Name'
                 onChange={(e) => {
-                    setEmail(e.target.value);
+                    setUserName(e.target.value);
                 }}
             /><br/>
             <input
