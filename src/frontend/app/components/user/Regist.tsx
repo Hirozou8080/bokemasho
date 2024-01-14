@@ -8,12 +8,12 @@ const Regist = () => {
 
   // XSRF-TOKENをリクエスト時に送信するための設定
   const http = axios.create({
-    baseURL: 'http://127.0.0.2:8080',
+    baseURL: 'http://127.0.0.1:8080',
     withCredentials: true,
   });
 
   const postData = async () => {
-    axios.get('http://127.0.0.2:8080/sanctum/csrf-cookie',
+    axios.get('http://127.0.0.1:8080/sanctum/csrf-cookie',
      { withCredentials: true })
      .then((res: any) => {
         // 登録処理
