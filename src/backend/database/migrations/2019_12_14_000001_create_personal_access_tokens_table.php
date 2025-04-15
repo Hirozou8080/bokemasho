@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->id();
-            $table->morphs('tokenable');
-            $table->string('name');
-            $table->string('token', 64)->unique();
-            $table->text('abilities')->nullable();
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
+            $table->morphs('tokenable'); // トークンの所有者
+            $table->string('name'); // トークンの名前   
+            $table->string('token', 64)->unique(); // トークンの値
+            $table->text('abilities')->nullable(); // トークンの権限
+            $table->timestamp('last_used_at')->nullable(); // トークンの最後の使用時間
+            $table->timestamp('expires_at')->nullable(); // トークンの有効期限
             $table->timestamps();
         });
     }

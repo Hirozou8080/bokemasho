@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +18,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// パスワードリセット用の標準ルート
+Route::get('/reset-password/{token}', function ($token) {
+    return redirect(env('FRONTEND_URL') . '/auth/reset-password?token=' . $token);
+})->middleware('guest')->name('password.reset');
+
+Route::post('/reset-password', function (Request $request) {
+    // APIルートがあるので必要ない
+})->middleware('guest')->name('password.update');

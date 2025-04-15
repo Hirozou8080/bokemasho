@@ -46,7 +46,7 @@ services:
     volumes:
       - db-store_next-laravel:/var/lib/mysql
     ports:
-      - "${IP}:3306:3306"
+      - "${IP}:13306:3306"
     environment:
       TZ: Asia/Tokyo
     container_name: next-laravel_db
@@ -90,16 +90,6 @@ services:
     ports:
       - "${IP}:8025:8025"
     container_name: next-laravel_mailhog
-
-  ngrok:
-    container_name: next-laravel_ngrok
-    image: wernight/ngrok:latest
-    ports:
-      - "${IP}:4040:4040"
-    environment:
-      NGROK_AUTH: ${NGROKAUTH}
-      NGROK_PROTOCOL: http
-      NGROK_PORT: next-laravel-frontend:3000
 
 volumes:
   db-store_next-laravel:
