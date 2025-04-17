@@ -1,10 +1,10 @@
 import React from "react";
-import { AppBar, Box, Toolbar, Button } from "@mui/material";
+import { AppBar, Box, Toolbar, Button, ButtonGroup } from "@mui/material";
 import Typography from "../atoms/Typography";
 import Link from "next/link";
 import Image from "next/image";
 import { LoginButtonWrapper } from "./LoginButtonWrapper";
-import { AddCircleOutline } from "@mui/icons-material";
+import { AddCircleOutline, ListAlt, Home } from "@mui/icons-material";
 
 export function Header() {
   return (
@@ -43,16 +43,35 @@ export function Header() {
           </Link>
         </Box>
 
-        <Button
-          component={Link}
-          href="/bokeh/create"
+        <ButtonGroup
           variant="contained"
-          color="secondary"
-          startIcon={<AddCircleOutline />}
           sx={{ mr: 2, display: { xs: "none", sm: "flex" } }}
         >
-          お題を投稿
-        </Button>
+          <Button
+            component={Link}
+            href="/"
+            startIcon={<Home />}
+            color="primary"
+          >
+            ホーム
+          </Button>
+          <Button
+            component={Link}
+            href="/joke_topic/list"
+            startIcon={<ListAlt />}
+            color="primary"
+          >
+            お題一覧
+          </Button>
+          <Button
+            component={Link}
+            href="/joke_topic/create"
+            startIcon={<AddCircleOutline />}
+            color="secondary"
+          >
+            お題を投稿
+          </Button>
+        </ButtonGroup>
 
         <LoginButtonWrapper />
       </Toolbar>

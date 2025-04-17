@@ -100,7 +100,11 @@ export default function LoginButton() {
         <MenuItem component={Link} href="/profile" onClick={handleClose}>
           プロフィール
         </MenuItem>
-        <MenuItem component={Link} href="/bokeh/create" onClick={handleClose}>
+        <MenuItem
+          component={Link}
+          href="/joke_topic/create"
+          onClick={handleClose}
+        >
           お題を投稿
         </MenuItem>
         <MenuItem onClick={handleLogout}>

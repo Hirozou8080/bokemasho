@@ -48,8 +48,8 @@ class User extends Authenticatable
     /**
      * ユーザーが投稿したボケお題
      */
-    public function bokehTopics()
+    public function jokeTopics()
     {
-        return $this->hasMany(BokehTopic::class);
+        return $this->hasMany(JokeTopic::class);
     }
 }

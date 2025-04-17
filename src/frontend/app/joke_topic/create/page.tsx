@@ -13,8 +13,9 @@ import {
   Typography,
 } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
+import Link from "next/link";
 
-export default function CreateBokehTopicPage() {
+export default function CreateJokeTopicPage() {
   const router = useRouter();
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,25 +23,28 @@ export default function CreateBokehTopicPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await getUser();
-        if (!(response && response.user)) {
-          // ログインしていない場合はログインページにリダイレクト
-          router.push("/auth/login");
+        if (response && response.user) {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
         }
       } catch (err) {
         setError("認証情報の取得に失敗しました");
         console.error("Failed to fetch user data:", err);
+        setIsLoggedIn(false);
       } finally {
         setLoading(false);
       }
     };
 
     checkAuth();
-  }, [router]);
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -77,7 +81,7 @@ export default function CreateBokehTopicPage() {
       const formData = new FormData();
       formData.append("image", image);
 
-      const response = await fetch(`${API_URL}/bokeh-topics`, {
+      const response = await fetch(`${API_URL}/joke-topics`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -97,12 +101,12 @@ export default function CreateBokehTopicPage() {
       setImage(null);
       setPreviewUrl(null);
 
-      // 成功後1.5秒後にホームページにリダイレクト
+      // 成功後1.5秒後にボケお題一覧にリダイレクト
       setTimeout(() => {
-        router.push("/");
+        router.push("/joke_topic/list");
       }, 1500);
     } catch (err) {
-      console.error("Failed to submit bokeh topic:", err);
+      console.error("Failed to submit joke topic:", err);
       setError("ボケお題の投稿に失敗しました");
     } finally {
       setSubmitting(false);
@@ -114,6 +118,42 @@ export default function CreateBokehTopicPage() {
       <MainLayout>
         <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
           <CircularProgress />
+        </Box>
+      </MainLayout>
+    );
+  }
+
+  // 非ログイン時の表示
+  if (!isLoggedIn) {
+    return (
+      <MainLayout>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            mt: 8,
+            px: 2,
+          }}
+        >
+          <Alert
+            severity="warning"
+            sx={{ width: "100%", maxWidth: 600, mb: 3 }}
+          >
+            ログインが必要です
+          </Alert>
+          <Typography variant="h6" gutterBottom textAlign="center">
+            ボケお題を投稿するにはログインが必要です
+          </Typography>
+          <Button
+            component={Link}
+            href="/auth/login"
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3 }}
+          >
+            ログイン画面へ
+          </Button>
         </Box>
       </MainLayout>
     );
@@ -142,7 +182,7 @@ export default function CreateBokehTopicPage() {
 
           {success && (
             <Alert severity="success" sx={{ mb: 3 }}>
-              ボケお題を投稿しました！トップページに戻ります...
+              ボケお題を投稿しました！お題一覧に戻ります...
             </Alert>
           )}
 
@@ -186,9 +226,13 @@ export default function CreateBokehTopicPage() {
                   src={previewUrl}
                   alt="プレビュー"
                   style={{
+                    margin: "auto",
                     maxWidth: "100%",
                     maxHeight: "300px",
                     borderRadius: "4px",
+                    objectFit: "contain",
+                    backgroundColor: "#f5f5f5",
+                    padding: "8px",
                   }}
                 />
               </Box>

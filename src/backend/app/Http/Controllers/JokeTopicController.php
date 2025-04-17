@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BokehTopic;
+use App\Models\JokeTopic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
-class BokehTopicController extends Controller
+class JokeTopicController extends Controller
 {
   /**
    * お題一覧を取得
    */
   public function index()
   {
-    $topics = BokehTopic::with('user')
+    $topics = JokeTopic::with('user')
       ->orderBy('priority', 'desc')
       ->orderBy('created_at', 'desc')
       ->paginate(10);
@@ -31,7 +31,7 @@ class BokehTopicController extends Controller
    */
   public function show($id)
   {
-    $topic = BokehTopic::with('user')->findOrFail($id);
+    $topic = JokeTopic::with('user')->findOrFail($id);
     return response()->json([
       'data' => $topic
     ]);
@@ -56,12 +56,12 @@ class BokehTopicController extends Controller
     }
 
     try {
-      $topic = new BokehTopic();
+      $topic = new JokeTopic();
       $topic->user_id = $user->id;
 
       // 画像をアップロード
       if ($request->hasFile('image')) {
-        $path = $request->file('image')->store('bokeh_topics', 'public');
+        $path = $request->file('image')->store('joke_topics', 'public');
         $topic->image_path = $path;
       } else {
         return response()->json(['message' => '画像が必要です'], 422);
@@ -94,7 +94,7 @@ class BokehTopicController extends Controller
     }
 
     $user = Auth::user();
-    $topic = BokehTopic::findOrFail($id);
+    $topic = JokeTopic::findOrFail($id);
 
     // 投稿者本人のみ更新可能
     if ($topic->user_id !== $user->id) {
@@ -113,7 +113,7 @@ class BokehTopicController extends Controller
           Storage::disk('public')->delete($topic->image_path);
         }
 
-        $path = $request->file('image')->store('bokeh_topics', 'public');
+        $path = $request->file('image')->store('joke_topics', 'public');
         $topic->image_path = $path;
       }
 
@@ -135,7 +135,7 @@ class BokehTopicController extends Controller
   public function destroy($id)
   {
     $user = Auth::user();
-    $topic = BokehTopic::findOrFail($id);
+    $topic = JokeTopic::findOrFail($id);
 
     // 投稿者本人のみ削除可能
     if ($topic->user_id !== $user->id) {
