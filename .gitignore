@@ -3,4 +3,5 @@
 nginx_log/*
 
 .env
+.env.prod
 src/frontend/.cache/
