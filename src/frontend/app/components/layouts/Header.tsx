@@ -4,7 +4,12 @@ import Typography from "../atoms/Typography";
 import Link from "next/link";
 import Image from "next/image";
 import { LoginButtonWrapper } from "./LoginButtonWrapper";
-import { AddCircleOutline, ListAlt, Home } from "@mui/icons-material";
+import {
+  AddCircleOutline,
+  ListAlt,
+  Home,
+  EmojiEmotions,
+} from "@mui/icons-material";
 
 export function Header() {
   return (
@@ -62,6 +67,14 @@ export function Header() {
             color="primary"
           >
             お題一覧
+          </Button>
+          <Button
+            component={Link}
+            href="/jokes"
+            startIcon={<EmojiEmotions />}
+            color="primary"
+          >
+            ボケ一覧
           </Button>
           <Button
             component={Link}

@@ -72,7 +72,16 @@ export default function Home() {
           throw new Error("ボケの取得に失敗しました");
         }
 
-        const data = await response.json();
+        const responseText = await response.text();
+        let data;
+
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error("JSON parse error:", parseError, responseText);
+          throw new Error("レスポンスの解析に失敗しました");
+        }
+
         if (Array.isArray(data.data.data)) {
           setJokes(data.data.data);
         } else if (Array.isArray(data.data)) {
@@ -83,7 +92,9 @@ export default function Home() {
         }
       } catch (err) {
         console.error("Failed to fetch jokes:", err);
-        setJokesError("ボケの取得に失敗しました");
+        setJokesError(
+          err instanceof Error ? err.message : "ボケの取得に失敗しました"
+        );
       } finally {
         setJokesLoading(false);
       }
@@ -105,7 +116,16 @@ export default function Home() {
           throw new Error("ボケお題の取得に失敗しました");
         }
 
-        const data = await response.json();
+        const responseText = await response.text();
+        let data;
+
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error("JSON parse error:", parseError, responseText);
+          throw new Error("レスポンスの解析に失敗しました");
+        }
+
         if (Array.isArray(data.data.data)) {
           setTopics(data.data.data);
         } else {
@@ -115,7 +135,9 @@ export default function Home() {
         }
       } catch (err) {
         console.error("Failed to fetch topics:", err);
-        setTopicsError("ボケお題の取得に失敗しました");
+        setTopicsError(
+          err instanceof Error ? err.message : "ボケお題の取得に失敗しました"
+        );
       } finally {
         setTopicsLoading(false);
       }
@@ -200,7 +222,7 @@ export default function Home() {
             {jokes.slice(0, 6).map((joke) => (
               <Box
                 key={joke.id}
-                sx={{ width: { xs: "100%", md: "48%" }, mb: 3 }}
+                sx={{ width: { xs: "100%", sm: "48%", md: "31%" }, mb: 3 }}
               >
                 <Card
                   sx={{

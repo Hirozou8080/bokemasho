@@ -141,9 +141,9 @@ export default function JokeResponsePage() {
       setSuccess(true);
       setJokeText("");
 
-      // 成功後1.5秒後に一覧ページに戻る
+      // 成功後1.5秒後にボケ一覧ページに遷移
       setTimeout(() => {
-        router.push("/joke_topic/list");
+        router.push("/jokes");
       }, 1500);
     } catch (err) {
       console.error("Failed to submit joke:", err);
