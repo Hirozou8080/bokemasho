@@ -15,20 +15,14 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'storage/*'],
 
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout', 'storage/*'],
     'allowed_methods' => ['*'],
-
-    'allowed_origins' => ['*'],
-
-    'allowed_origins_patterns' => [],
-
-    'allowed_headers' => ['*'],
-
+    'allowed_origins' => ['https://bokemasho.hirokilab.com', 'https://bokemasho-*.vercel.app'],
+    'allowed_origins_patterns' => ['#^https://bokemasho-[a-z0-9]+-hirokilabs-projects\.vercel\.app$#'],
+    'allowed_headers' => ['X-CSRF-TOKEN', 'X-XSRF-TOKEN', 'Content-Type', 'Accept', 'Authorization', 'X-Requested-With'],
     'exposed_headers' => [],
-
     'max_age' => 0,
-
     // 'supports_credentials' => false,
     'supports_credentials' => true,
 ];
