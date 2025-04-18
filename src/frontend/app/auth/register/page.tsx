@@ -78,6 +78,7 @@ export default function RegisterPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "登録に失敗しました");
     } finally {
+      console.log("登録完了");
       setLoading(false);
     }
   };

@@ -16,7 +16,8 @@ export const getCsrfToken = async (): Promise<void> => {
       }
     );
 
-    // トークンがCookieに設定される時間を確保
+    console.log("CSRFトークン取得");
+    console.log(response); //  トークンがCookieに設定される時間を確保
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     // コンソールログを削除
@@ -225,15 +226,29 @@ export const updateProfile = async (userData: {
 };
 
 // xsrfTokenを取得
-export const getXsrfToken = async (): Promise<string> => {
+export const getXsrfToken = () => {
   const cookies = document.cookie.split(";");
   let xsrfToken = "";
+
+  // すべてのCookieをログ出力して確認
+  console.log("All cookies:", cookies);
+
   for (const cookie of cookies) {
     const [name, value] = cookie.trim().split("=");
+    console.log(`Cookie ${name}: ${value}`);
+
     if (name === "XSRF-TOKEN") {
       xsrfToken = decodeURIComponent(value);
-      break;
+      console.log("Found regular XSRF token");
+    } else if (name === "ENC_XSRF-TOKEN") {
+      xsrfToken = decodeURIComponent(value);
+      console.log("Found encrypted XSRF token");
     }
   }
+
+  if (!xsrfToken) {
+    console.error("XSRF-TOKEN not found");
+  }
+
   return xsrfToken;
 };

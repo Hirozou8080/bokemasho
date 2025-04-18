@@ -115,8 +115,7 @@ export default function JokeResponsePage() {
       const xsrfToken = await getXsrfToken();
 
       // APIエンドポイントのベースURL
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
       const response = await fetch(`${API_URL}/jokes/create`, {
         method: "POST",
