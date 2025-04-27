@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getUser, getCsrfToken, getXsrfToken } from "@/app/lib/auth";
+import { getUser, getToken } from "@/app/lib/auth";
 import MainLayout from "@/app/components/templates/MainLayout";
 import {
   Box,
@@ -110,10 +110,6 @@ export default function JokeResponsePage() {
     }
 
     try {
-      // CSRFトークンを取得
-      await getCsrfToken();
-      const xsrfToken = await getXsrfToken();
-
       // APIエンドポイントのベースURL
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -122,10 +118,8 @@ export default function JokeResponsePage() {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-          "X-XSRF-TOKEN": xsrfToken,
+          ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
         },
-        credentials: "include",
         body: JSON.stringify({
           topic_id: topicId,
           content: jokeText,

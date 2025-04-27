@@ -46,6 +46,12 @@ export const getCsrfToken = async (): Promise<void> => {
   /* no-op for token auth */
 };
 
+// 旧 SPA 認証で使用していた XSRF トークン取得関数のダミー実装
+export const getXsrfToken = async (): Promise<string> => {
+  // トークンベース認証では不要なので空文字列を返す
+  return "";
+};
+
 // ログイン
 export const login = async (email: string, password: string): Promise<any> => {
   const response = await fetch(`${API_URL}/login`, {
