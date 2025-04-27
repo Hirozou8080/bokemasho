@@ -39,10 +39,11 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, //コメントアウトを外す
+            // トークンベース認証では Statefull Cookie を前提とするミドルウェアは不要
+            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \Illuminate\Session\Middleware\StartSession::class,
+            // Session は不要だが、お気に入りの場合は有効のままでも可
         ],
     ];
 

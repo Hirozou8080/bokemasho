@@ -5,40 +5,55 @@ import { useRouter } from "next/navigation";
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
 
-// CSRFトークン取得
+// =======================
+// Personal Access Token 認証用ユーティリティ
+// =======================
+
+const TOKEN_KEY = "access_token";
+
+export const getToken = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEY);
+};
+
+export const setToken = (token: string) => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(TOKEN_KEY, token);
+};
+
+export const clearToken = () => {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(TOKEN_KEY);
+};
+
+// 認証ヘッダー生成
+const authHeaders = () => {
+  const token = getToken();
+  return token
+    ? { Authorization: `Bearer ${token}` }
+    : ({} as Record<string, string>);
+};
+
+// 共通ヘッダー（JSON かつ Bearer があれば付与）
+const jsonHeaders = (): HeadersInit => ({
+  "Content-Type": "application/json",
+  Accept: "application/json",
+  ...authHeaders(),
+});
+
+// CSRF ベースの SPA 認証は不要になったが、既存コード互換のため空関数を残す
 export const getCsrfToken = async (): Promise<void> => {
-  try {
-    const response = await fetch(
-      `${API_URL.replace("/api", "")}/sanctum/csrf-cookie`,
-      {
-        credentials: "include",
-        mode: "cors",
-      }
-    );
-
-    console.log("CSRFトークン取得");
-    console.log(response); //  トークンがCookieに設定される時間を確保
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    // コンソールログを削除
-  } catch (error) {
-    console.error("CSRF token fetch error:", error);
-  }
+  /* no-op for token auth */
 };
 
 // ログイン
 export const login = async (email: string, password: string): Promise<any> => {
-  await getCsrfToken();
-
   const response = await fetch(`${API_URL}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-      "X-XSRF-TOKEN": await getXsrfToken(),
-    },
-    credentials: "include",
+    } as HeadersInit,
     body: JSON.stringify({ email, password }),
   });
 
@@ -46,23 +61,20 @@ export const login = async (email: string, password: string): Promise<any> => {
     const error = await response.json();
     throw new Error(error.message || "ログインに失敗しました");
   }
-  return response.json();
+
+  const data = await response.json();
+  if (data.token) setToken(data.token);
+  return data;
 };
 
 // ログアウト
 export const logout = async (): Promise<any> => {
-  await getCsrfToken();
-
   const response = await fetch(`${API_URL}/logout`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-      "X-XSRF-TOKEN": await getXsrfToken(),
-    },
-    credentials: "include",
+    headers: jsonHeaders(),
   });
+
+  clearToken();
 
   if (!response.ok) {
     const error = await response.json();
@@ -74,16 +86,8 @@ export const logout = async (): Promise<any> => {
 
 // ユーザー情報取得
 export const getUser = async (): Promise<any> => {
-  await getCsrfToken();
-
   const response = await fetch(`${API_URL}/user`, {
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-      "X-XSRF-TOKEN": await getXsrfToken(),
-    },
-    credentials: "include",
+    headers: jsonHeaders(),
   });
 
   if (!response.ok) {
@@ -95,17 +99,12 @@ export const getUser = async (): Promise<any> => {
 
 // パスワードリセットメール送信
 export const sendPasswordResetLink = async (email: string): Promise<any> => {
-  await getCsrfToken();
-
   const response = await fetch(`${API_URL}/forgot-password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-      "X-XSRF-TOKEN": await getXsrfToken(),
     },
-    credentials: "include",
     body: JSON.stringify({ email }),
   });
 
@@ -126,28 +125,12 @@ export const resetPassword = async (
   password_confirmation: string,
   token: string
 ): Promise<any> => {
-  await getCsrfToken();
-
-  // Cookieからxsrf-tokenを取得
-  const cookies = document.cookie.split(";");
-  let xsrfToken = "";
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split("=");
-    if (name === "XSRF-TOKEN") {
-      xsrfToken = decodeURIComponent(value);
-      break;
-    }
-  }
-
   const response = await fetch(`${API_URL}/reset-password`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-      "X-XSRF-TOKEN": xsrfToken,
     },
-    credentials: "include",
     body: JSON.stringify({
       email,
       password,
@@ -171,17 +154,12 @@ export const register = async (
   password: string,
   password_confirmation: string
 ): Promise<any> => {
-  await getCsrfToken();
-
   const response = await fetch(`${API_URL}/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-      "X-XSRF-TOKEN": await getXsrfToken(),
-    },
-    credentials: "include",
+    } as HeadersInit,
     body: JSON.stringify({
       username,
       email,
@@ -195,7 +173,9 @@ export const register = async (
     throw new Error(error.message || "登録に失敗しました");
   }
 
-  return response.json();
+  const data = await response.json();
+  if (data.token) setToken(data.token);
+  return data;
 };
 
 // プロフィール更新
@@ -203,17 +183,9 @@ export const updateProfile = async (userData: {
   username?: string;
   bio?: string;
 }): Promise<any> => {
-  await getCsrfToken();
-
   const response = await fetch(`${API_URL}/profile`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-      "X-XSRF-TOKEN": await getXsrfToken(),
-    },
-    credentials: "include",
+    headers: jsonHeaders(),
     body: JSON.stringify(userData),
   });
 
@@ -223,32 +195,4 @@ export const updateProfile = async (userData: {
   }
 
   return response.json();
-};
-
-// xsrfTokenを取得
-export const getXsrfToken = () => {
-  const cookies = document.cookie.split(";");
-  let xsrfToken = "";
-
-  // すべてのCookieをログ出力して確認
-  console.log("All cookies:", cookies);
-
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split("=");
-    console.log(`Cookie ${name}: ${value}`);
-
-    if (name === "XSRF-TOKEN") {
-      xsrfToken = decodeURIComponent(value);
-      console.log("Found regular XSRF token");
-    } else if (name === "ENC_XSRF-TOKEN") {
-      xsrfToken = decodeURIComponent(value);
-      console.log("Found encrypted XSRF token");
-    }
-  }
-
-  if (!xsrfToken) {
-    console.error("XSRF-TOKEN not found");
-  }
-
-  return xsrfToken;
 };
