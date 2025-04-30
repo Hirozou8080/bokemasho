@@ -37,19 +37,19 @@ export const metadata: Metadata = {
   },
   themeColor: "#ffffff",
   alternates: {
-    canonical: "https://bokemasho.com/",
+    canonical: "https://bokemasho.vercel.app/",
   },
   openGraph: {
     title: "ボケ魔性 | 魔性の笑いを届けるお笑いメディア",
     description:
       "ボケ魂を刺激する魔性の笑い・面白ネタ・大喜利を毎日更新！芸人志望者にも役立つインスピレーション満載。",
-    url: "https://bokemasho.com/",
+    url: "https://bokemasho.vercel.app/",
     siteName: "ボケ魔性",
     locale: "ja_JP",
     type: "website",
     images: [
       {
-        url: "https://bokemasho.com/ogp.jpg",
+        url: "https://bokemasho.vercel.app/ogp.png",
         width: 1200,
         height: 630,
         alt: "ボケ魔性のOGP画像",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     description:
       "ボケ魂を刺激する魔性の笑い・面白ネタ・大喜利を毎日更新！芸人志望者にも役立つインスピレーション満載。",
     creator: "@bokemasho",
-    images: ["https://bokemasho.com/ogp.jpg"],
+    images: ["https://bokemasho.vercel.app/ogp.png"],
   },
   icons: {
     icon: "/favicon.ico",
