@@ -70,10 +70,11 @@ export default function EditProfilePage() {
       };
 
       const result = await updateProfile(updatedData);
-      if (result && result.user) {
+      console.log(result);
+      if (result && result.data) {
         setSuccess(true);
         // 更新されたユーザー情報を反映
-        setUser(result.user);
+        setUser(result.data);
         router.push("/profile");
       }
       console.log("プロフィールを更新しました");
