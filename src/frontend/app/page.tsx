@@ -4,6 +4,11 @@ import React, { useState, useEffect } from "react";
 import MainLayout from "./components/templates/MainLayout";
 import Typography from "./components/atoms/Typography";
 import { getUser, getToken } from "@/app/lib/auth";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import { useRouter } from "next/navigation";
 
 import {
   Box,
@@ -63,6 +68,8 @@ export default function Home() {
   const [jokesError, setJokesError] = useState("");
   const [topicsError, setTopicsError] = useState("");
   const [user, setUser] = useState<User | null>(null);
+  const [openModal, setOpenModal] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -172,6 +179,10 @@ export default function Home() {
 
   // 投票処理
   const handleVote = async (jokeId: number) => {
+    if (!user) {
+      setOpenModal(true);
+      return;
+    }
     try {
       const API_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
@@ -472,6 +483,23 @@ export default function Home() {
           </Stack>
         )}
       </Box>
+      <Dialog open={openModal} onClose={() => setOpenModal(false)}>
+        <DialogTitle>ログインが必要です</DialogTitle>
+        <DialogContent>グッドを押すにはログインをしてください。</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenModal(false)}>閉じる</Button>
+          <Button
+            onClick={() => {
+              setOpenModal(false);
+              router.push("/auth/login");
+            }}
+            color="primary"
+            variant="contained"
+          >
+            ログインページへ
+          </Button>
+        </DialogActions>
+      </Dialog>
     </MainLayout>
   );
 }

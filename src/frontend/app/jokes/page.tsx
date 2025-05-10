@@ -21,6 +21,11 @@ import {
 import { ThumbUp, ArrowBack, EmojiEmotions } from "@mui/icons-material";
 import Link from "next/link";
 import { getUser, getToken } from "@/app/lib/auth";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import { useRouter } from "next/navigation";
 
 interface Joke {
   id: number;
@@ -50,6 +55,8 @@ export default function JokesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [user, setUser] = useState<User | null>(null);
+  const [openModal, setOpenModal] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -130,6 +137,10 @@ export default function JokesPage() {
 
   // 投票処理
   const handleVote = async (jokeId: number) => {
+    if (!user) {
+      setOpenModal(true);
+      return;
+    }
     try {
       const API_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
@@ -339,6 +350,24 @@ export default function JokesPage() {
         <EmojiEmotions sx={{ mr: 1 }} />
         ボケる
       </Fab>
+
+      <Dialog open={openModal} onClose={() => setOpenModal(false)}>
+        <DialogTitle>ログインが必要です</DialogTitle>
+        <DialogContent>グッドを押すにはログインをしてください。</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenModal(false)}>閉じる</Button>
+          <Button
+            onClick={() => {
+              setOpenModal(false);
+              router.push("/auth/login");
+            }}
+            color="primary"
+            variant="contained"
+          >
+            ログインページへ
+          </Button>
+        </DialogActions>
+      </Dialog>
     </MainLayout>
   );
 }
