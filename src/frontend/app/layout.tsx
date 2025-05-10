@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import ThemeRegistry from "./theme-registry";
 import { Metadata } from "next";
 import icon from "@/public/images/robot-logo.png";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -103,6 +104,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-N51ZY8S9FB"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-tag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-N51ZY8S9FB');
+          `}
+        </Script>
+      </head>
       <body className={inter.className}>
         <ThemeRegistry>{children}</ThemeRegistry>
       </body>
