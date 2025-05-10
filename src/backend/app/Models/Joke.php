@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{
+    Factories\HasFactory,
+    Model,
+    SoftDeletes
+};
 
 class Joke extends Model
 {
@@ -36,5 +38,15 @@ class Joke extends Model
     public function topic()
     {
         return $this->belongsTo(JokeTopic::class, 'topic_id');
+    }
+
+    public function votes()
+    {
+        return $this->hasMany(Vote::class);
+    }
+
+    public function hasVotedBy(User $user)
+    {
+        return $this->votes()->where('user_id', $user->id)->exists();
     }
 }

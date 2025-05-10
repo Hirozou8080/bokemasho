@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import MainLayout from "./components/templates/MainLayout";
 import Typography from "./components/atoms/Typography";
+import { getUser, getToken } from "@/app/lib/auth";
+
 import {
   Box,
   Button,
@@ -22,8 +24,9 @@ import Link from "next/link";
 interface Joke {
   id: number;
   content: string;
-  votes: number;
+  votes_count: number;
   created_at: string;
+  has_voted: boolean;
   user: {
     username: string;
     avatar?: string;
@@ -47,6 +50,11 @@ interface JokeTopic {
   };
 }
 
+interface User {
+  id: number;
+  username: string;
+}
+
 export default function Home() {
   const [jokes, setJokes] = useState<Joke[]>([]);
   const [topics, setTopics] = useState<JokeTopic[]>([]);
@@ -54,13 +62,28 @@ export default function Home() {
   const [topicsLoading, setTopicsLoading] = useState(true);
   const [jokesError, setJokesError] = useState("");
   const [topicsError, setTopicsError] = useState("");
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await getUser();
+      if (response && response.user) {
+        setUser(response.user);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     const fetchJokes = async () => {
       try {
         const API_URL =
           process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
-        const response = await fetch(`${API_URL}/jokes`, {
+        const url = user
+          ? `${API_URL}/jokes?user_id=${user.id}`
+          : `${API_URL}/jokes`;
+        const response = await fetch(url, {
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -145,7 +168,46 @@ export default function Home() {
 
     fetchJokes();
     fetchTopics();
-  }, []);
+  }, [user]);
+
+  // 投票処理
+  const handleVote = async (jokeId: number) => {
+    try {
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
+
+      const response = await fetch(`${API_URL}/jokes/${jokeId}/vote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("投票に失敗しました");
+      }
+
+      const data = await response.json();
+
+      // 投票状態を更新
+      setJokes((prevJokes) =>
+        prevJokes.map((joke) =>
+          joke.id === jokeId
+            ? {
+                ...joke,
+                votes_count: data.vote_count,
+                has_voted: data.has_voted,
+              }
+            : joke
+        )
+      );
+    } catch (err) {
+      console.error("Failed to vote:", err);
+      alert(err instanceof Error ? err.message : "投票に失敗しました");
+    }
+  };
 
   return (
     <MainLayout>
@@ -171,8 +233,14 @@ export default function Home() {
             sx={{
               fontWeight: "bold",
               borderRadius: "28px",
-              px: 3,
-              py: 1,
+              px: { xs: 2, sm: 3 },
+              py: { xs: 0.5, sm: 1 },
+              fontSize: { xs: "0.9rem", sm: "1rem" },
+              minWidth: { xs: "120px", sm: "auto" },
+              height: { xs: "40px", sm: "48px" },
+              "& .MuiButton-startIcon": {
+                marginRight: { xs: 0.5, sm: 1 },
+              },
             }}
           >
             ボケる
@@ -272,13 +340,27 @@ export default function Home() {
                         {new Date(joke.created_at).toLocaleDateString("ja-JP")}
                       </Typography>
                       <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <ThumbUp
-                          fontSize="small"
-                          color="primary"
-                          sx={{ mr: 0.5 }}
-                        />
+                        <Button
+                          onClick={() => handleVote(joke.id)}
+                          sx={{
+                            minWidth: "auto",
+                            p: 0.5,
+                            color: joke.has_voted
+                              ? "primary.main"
+                              : "text.secondary",
+                            "&:hover": {
+                              backgroundColor: "transparent",
+                            },
+                          }}
+                        >
+                          <ThumbUp
+                            fontSize="small"
+                            color={joke.has_voted ? "primary" : "inherit"}
+                            sx={{ mr: 0.5 }}
+                          />
+                        </Button>
                         <Typography variant="body2" color="primary">
-                          {joke.votes}
+                          {joke.votes_count || 0}
                         </Typography>
                       </Box>
                     </Box>

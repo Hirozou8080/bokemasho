@@ -20,11 +20,14 @@ import {
 } from "@mui/material";
 import { ThumbUp, ArrowBack, EmojiEmotions } from "@mui/icons-material";
 import Link from "next/link";
+import { getUser, getToken } from "@/app/lib/auth";
 
 interface Joke {
   id: number;
   content: string;
   votes: number;
+  has_voted: boolean;
+  votes_count: number;
   created_at: string;
   user: {
     username: string;
@@ -36,24 +39,8 @@ interface Joke {
   };
 }
 
-interface PaginatedResponse {
-  current_page: number;
-  data: Joke[];
-  first_page_url: string;
-  from: number;
-  last_page: number;
-  last_page_url: string;
-  links: Array<{
-    url: string | null;
-    label: string;
-    active: boolean;
-  }>;
-  next_page_url: string | null;
-  path: string;
-  per_page: number;
-  prev_page_url: string | null;
-  to: number;
-  total: number;
+interface User {
+  id: number;
 }
 
 export default function JokesPage() {
@@ -62,6 +49,18 @@ export default function JokesPage() {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await getUser();
+      if (response && response.user) {
+        setUser(response.user);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     const fetchJokes = async () => {
@@ -69,13 +68,18 @@ export default function JokesPage() {
         setLoading(true);
         const API_URL =
           process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
-        const response = await fetch(`${API_URL}/jokes?page=${page}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-        });
+        const response = await fetch(
+          user
+            ? `${API_URL}/jokes?page=${page}&user_id=${user.id}`
+            : `${API_URL}/jokes?page=${page}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            credentials: "include",
+          }
+        );
 
         if (!response.ok) {
           throw new Error("ボケの取得に失敗しました");
@@ -114,7 +118,7 @@ export default function JokesPage() {
     };
 
     fetchJokes();
-  }, [page]);
+  }, [page, user]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -122,6 +126,45 @@ export default function JokesPage() {
   ) => {
     setPage(value);
     window.scrollTo(0, 0);
+  };
+
+  // 投票処理
+  const handleVote = async (jokeId: number) => {
+    try {
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
+
+      const response = await fetch(`${API_URL}/jokes/${jokeId}/vote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("投票に失敗しました");
+      }
+
+      const data = await response.json();
+
+      // 投票状態を更新
+      setJokes((prevJokes) =>
+        prevJokes.map((joke) =>
+          joke.id === jokeId
+            ? {
+                ...joke,
+                votes_count: data.vote_count,
+                has_voted: data.has_voted,
+              }
+            : joke
+        )
+      );
+    } catch (err) {
+      console.error("Failed to vote:", err);
+      alert(err instanceof Error ? err.message : "投票に失敗しました");
+    }
   };
 
   return (
@@ -220,13 +263,27 @@ export default function JokesPage() {
                           )}
                         </Typography>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <ThumbUp
-                            fontSize="small"
-                            color="primary"
-                            sx={{ mr: 0.5 }}
-                          />
+                          <Button
+                            onClick={() => handleVote(joke.id)}
+                            sx={{
+                              minWidth: "auto",
+                              p: 0.5,
+                              color: joke.has_voted
+                                ? "primary.main"
+                                : "text.secondary",
+                              "&:hover": {
+                                backgroundColor: "transparent",
+                              },
+                            }}
+                          >
+                            <ThumbUp
+                              fontSize="small"
+                              color={joke.has_voted ? "primary" : "inherit"}
+                              sx={{ mr: 0.5 }}
+                            />
+                          </Button>
                           <Typography variant="body2" color="primary">
-                            {joke.votes}
+                            {joke.votes_count || 0}
                           </Typography>
                         </Box>
                       </Box>

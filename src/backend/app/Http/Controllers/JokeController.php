@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Joke;
-use App\Models\JokeTopic;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
+
+use App\Models\{
+    Joke,
+    JokeTopic,
+    Vote
+};
+use Illuminate\Support\Facades\{
+    Auth,
+    Log,
+    Validator
+};
 
 class JokeController extends Controller
 {
@@ -58,10 +64,24 @@ class JokeController extends Controller
     public function index(Request $request)
     {
         try {
+            $user_id = $request->query('user_id');
             $jokes = Joke::with('user', 'topic')
+                ->withCount('votes')
                 ->orderBy('priority', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
+
+            if ($user_id) {
+                $jokes->getCollection()->transform(function ($joke) use ($user_id) {
+                    $joke->has_voted = $joke->votes->contains('user_id', $user_id);
+                    return $joke;
+                });
+            } else {
+                $jokes->getCollection()->transform(function ($joke) {
+                    $joke->has_voted = false;
+                    return $joke;
+                });
+            }
 
             return response()->json([
                 'data' => $jokes
@@ -139,21 +159,38 @@ class JokeController extends Controller
     /**
      * ボケに投票する
      */
-    public function vote($id)
+    public function vote($jokeId)
     {
         $user = Auth::user();
+        Log::info($user);
         if (!$user) {
             return response()->json(['message' => '認証が必要です'], 401);
         }
 
         try {
-            $joke = Joke::findOrFail($id);
-            $joke->votes += 1;
-            $joke->save();
+            $vote = Vote::where('user_id', $user->id)
+                ->where('joke_id', $jokeId)
+                ->first();
+
+            if ($vote) {
+                // 既に投票済みの場合は投票を取り消し
+                $vote->delete();
+                $hasVoted = false;
+            } else {
+                // 新規投票
+                Vote::create([
+                    'user_id' => $user->id,
+                    'joke_id' => $jokeId
+                ]);
+                $hasVoted = true;
+            }
+
+            $voteCount = Vote::where('joke_id', $jokeId)->count();
 
             return response()->json([
-                'message' => 'ボケに投票しました',
-                'votes' => $joke->votes
+                'message' => $hasVoted ? 'ボケに投票しました' : '投票を取り消しました',
+                'vote_count' => $voteCount,
+                'has_voted' => $hasVoted
             ]);
         } catch (\Exception $e) {
             Log::error('ボケ投票エラー: ' . $e->getMessage());
