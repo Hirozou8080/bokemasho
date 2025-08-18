@@ -74,6 +74,20 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
+        url: "/favicon.ico",
+        type: "image/x-icon",
+      },
+      {
+        url: "/images/favicon-16x16.png",
+        sizes: "16x16",
+        type: "image/png",
+      },
+      {
+        url: "/images/favicon-32x32.png",
+        sizes: "32x32",
+        type: "image/png",
+      },
+      {
         url: "/images/android-chrome-192x192.png",
         sizes: "192x192",
         type: "image/png",
@@ -92,12 +106,13 @@ export const metadata: Metadata = {
         type: "image/png",
       },
     ],
-    other: [
-      {
-        rel: "mask-icon",
-        url: "/images/safari-pinned-tab.svg",
-      },
-    ],
+    // safari-pinned-tab.svgが存在しないため一時的にコメントアウト
+    // other: [
+    //   {
+    //     rel: "mask-icon",
+    //     url: "/images/safari-pinned-tab.svg",
+    //   },
+    // ],
   },
   manifest: "/site.webmanifest",
 };
@@ -110,6 +125,20 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link
+          rel="icon"
+          href="/images/favicon-16x16.png"
+          sizes="16x16"
+          type="image/png"
+        />
+        <link
+          rel="icon"
+          href="/images/favicon-32x32.png"
+          sizes="32x32"
+          type="image/png"
+        />
+        <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-N51ZY8S9FB"
           strategy="afterInteractive"
