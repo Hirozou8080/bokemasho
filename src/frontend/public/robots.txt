@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# サイトマップの場所を指定
+Sitemap: https://bokemasho.hirokilab.com/sitemap.xml
+
+# 認証関連ページはクローリングを制限
+Disallow: /auth/reset-password
+Disallow: /auth/complete
+Disallow: /profile/edit
+
+# ユーザー固有のページは制限
+Disallow: /profile/*
+
+# 管理者ページがある場合は制限
+Disallow: /admin/
+
+# APIエンドポイントは制限
+Disallow: /api/
