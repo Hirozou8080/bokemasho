@@ -1,7 +1,24 @@
 {
   "name": "ボケ魔性",
   "short_name": "ボケ魔性",
+  "description": "ボケ魂を刺激する魔性の笑い・面白ネタ・大喜利を毎日更新する日本最大級のお笑いプラットフォーム",
+  "start_url": "/",
   "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/images/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
     {
       "src": "/images/android-chrome-192x192.png",
       "sizes": "192x192",
@@ -11,9 +28,15 @@
       "src": "/images/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/images/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
   ],
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
-  "display": "standalone"
+  "display": "standalone",
+  "orientation": "portrait"
 }
