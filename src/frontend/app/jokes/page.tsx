@@ -106,6 +106,12 @@ export default function JokesPage() {
         if (data.data && data.data.data) {
           setJokes(data.data.data);
           setTotalPages(data.data.last_page || 1);
+          console.log("Pagination info:", {
+            currentPage: data.data.current_page,
+            lastPage: data.data.last_page,
+            total: data.data.total,
+            perPage: data.data.per_page
+          });
         } else if (data.data) {
           setJokes(data.data);
           setTotalPages(1);
@@ -314,19 +320,19 @@ export default function JokesPage() {
               ))}
             </Stack>
 
-            {totalPages > 1 && (
-              <Box
-                sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}
-              >
-                <Pagination
-                  count={totalPages}
-                  page={page}
-                  onChange={handlePageChange}
-                  color="primary"
-                  size="large"
-                />
-              </Box>
-            )}
+            <Box
+              sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}
+            >
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+                showFirstButton
+                showLastButton
+              />
+            </Box>
           </>
         )}
       </Box>
