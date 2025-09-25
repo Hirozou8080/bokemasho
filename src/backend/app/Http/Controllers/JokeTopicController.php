@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\JokeTopic;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
+
+use Illuminate\Support\Facades\{
+  Auth,
+  Log,
+  Storage,
+  Validator
+};
 
 class JokeTopicController extends Controller
 {
@@ -19,7 +22,7 @@ class JokeTopicController extends Controller
     $topics = JokeTopic::with('user')
       ->orderBy('priority', 'desc')
       ->orderBy('created_at', 'desc')
-      ->paginate(10);
+      ->paginate(12);
 
     return response()->json([
       'data' => $topics

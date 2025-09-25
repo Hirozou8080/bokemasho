@@ -69,7 +69,7 @@ class JokeController extends Controller
                 ->withCount('votes')
                 ->orderBy('priority', 'desc')
                 ->orderBy('created_at', 'desc')
-                ->paginate(10);
+                ->paginate(12);
 
             if ($user_id) {
                 $jokes->getCollection()->transform(function ($joke) use ($user_id) {
