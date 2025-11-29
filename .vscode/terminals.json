@@ -13,7 +13,7 @@
       "description": "フロントエンドコンテナ",
       "open": true,
       "commands": [
-        "docker exec -it next-laravel-frontend bash",
+        "docker exec -it bokemasho-frontend bash",
         "yarn install",
         "yarn dev"
       ]
@@ -30,7 +30,7 @@
       "description": "バックエンドコンテナ",
       "open": true,
       "commands": [
-        "docker exec -it next-laravel-backend bash",
+        "docker exec -it bokemasho-backend bash",
         "composer update",
         "php artisan migrate",
         "php artisan serve --port=8080 --host=0.0.0.0"

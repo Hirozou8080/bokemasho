@@ -75,7 +75,7 @@ doc/
 ## プロジェクト構成
 
 ```
-next-laravel/
+bokemasho/
 ├── src/
 │   ├── frontend/          # Next.js
 │   │   ├── app/
