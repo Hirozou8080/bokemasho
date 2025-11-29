@@ -1,0 +1,452 @@
+# API一覧
+
+## 概要
+
+Laravel バックエンドが提供するRESTful APIの一覧です。
+ベースURL: `{NEXT_PUBLIC_API_URL}`
+
+## 認証方式
+
+Laravel Sanctum による Personal Access Token 認証を使用。
+
+```
+Authorization: Bearer {token}
+```
+
+## エンドポイント一覧
+
+### 認証 (Auth)
+
+#### ユーザー登録
+```
+POST /api/register
+```
+
+**リクエスト:**
+```json
+{
+  "name": "ユーザー名",
+  "email": "user@example.com",
+  "password": "password123",
+  "password_confirmation": "password123"
+}
+```
+
+**レスポンス:**
+```json
+{
+  "user": {
+    "id": 1,
+    "name": "ユーザー名",
+    "email": "user@example.com"
+  },
+  "token": "access_token_here"
+}
+```
+
+#### ログイン
+```
+POST /api/login
+```
+
+**リクエスト:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+**レスポンス:**
+```json
+{
+  "user": {
+    "id": 1,
+    "name": "ユーザー名",
+    "email": "user@example.com"
+  },
+  "token": "access_token_here"
+}
+```
+
+#### ログアウト
+```
+POST /api/logout
+```
+**認証:** 必要
+
+**レスポンス:**
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+#### 認証ユーザー情報取得
+```
+GET /api/user
+```
+**認証:** 必要
+
+**レスポンス:**
+```json
+{
+  "id": 1,
+  "name": "ユーザー名",
+  "email": "user@example.com",
+  "profile_image": "path/to/image.jpg",
+  "created_at": "2024-01-01T00:00:00.000000Z"
+}
+```
+
+### パスワードリセット
+
+#### リセットメール送信
+```
+POST /api/forgot-password
+```
+
+**リクエスト:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**レスポンス:**
+```json
+{
+  "message": "Password reset link sent"
+}
+```
+
+#### パスワードリセット実行
+```
+POST /api/reset-password
+```
+
+**リクエスト:**
+```json
+{
+  "email": "user@example.com",
+  "password": "newpassword123",
+  "password_confirmation": "newpassword123",
+  "token": "reset_token_here"
+}
+```
+
+**レスポンス:**
+```json
+{
+  "message": "Password reset successfully"
+}
+```
+
+### プロフィール
+
+#### プロフィール取得
+```
+GET /api/profile
+```
+**認証:** 必要
+
+**レスポンス:**
+```json
+{
+  "id": 1,
+  "name": "ユーザー名",
+  "email": "user@example.com",
+  "profile_image": "path/to/image.jpg"
+}
+```
+
+#### プロフィール更新
+```
+POST /api/profile
+```
+**認証:** 必要
+
+**リクエスト (multipart/form-data):**
+```
+name: 新しいユーザー名
+profile_image: (ファイル)
+```
+
+**レスポンス:**
+```json
+{
+  "id": 1,
+  "name": "新しいユーザー名",
+  "email": "user@example.com",
+  "profile_image": "path/to/new_image.jpg"
+}
+```
+
+### ボケお題 (Joke Topics)
+
+#### お題一覧取得
+```
+GET /api/joke-topics
+```
+**認証:** 不要
+
+**クエリパラメータ:**
+| パラメータ | 型 | 説明 |
+|-----------|-----|------|
+| page | int | ページ番号 |
+| per_page | int | 1ページあたりの件数 |
+
+**レスポンス:**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "お題タイトル",
+      "description": "お題の説明",
+      "image": "path/to/image.jpg",
+      "user_id": 1,
+      "user": {
+        "id": 1,
+        "name": "投稿者名"
+      },
+      "jokes_count": 10,
+      "created_at": "2024-01-01T00:00:00.000000Z"
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "last_page": 5,
+    "per_page": 10,
+    "total": 50
+  }
+}
+```
+
+#### お題詳細取得
+```
+GET /api/joke-topics/{id}
+```
+**認証:** 不要
+
+**レスポンス:**
+```json
+{
+  "id": 1,
+  "title": "お題タイトル",
+  "description": "お題の説明",
+  "image": "path/to/image.jpg",
+  "user_id": 1,
+  "user": {
+    "id": 1,
+    "name": "投稿者名"
+  },
+  "jokes": [
+    {
+      "id": 1,
+      "content": "ボケの内容",
+      "votes_count": 5
+    }
+  ],
+  "created_at": "2024-01-01T00:00:00.000000Z"
+}
+```
+
+#### お題作成
+```
+POST /api/joke-topics
+```
+**認証:** 必要
+
+**リクエスト (multipart/form-data):**
+```
+title: お題タイトル
+description: お題の説明
+image: (ファイル)
+```
+
+**レスポンス:**
+```json
+{
+  "id": 1,
+  "title": "お題タイトル",
+  "description": "お題の説明",
+  "image": "path/to/image.jpg",
+  "user_id": 1,
+  "created_at": "2024-01-01T00:00:00.000000Z"
+}
+```
+
+#### お題更新
+```
+PUT /api/joke-topics/{id}
+```
+**認証:** 必要（投稿者のみ）
+
+**リクエスト:**
+```json
+{
+  "title": "更新後のタイトル",
+  "description": "更新後の説明"
+}
+```
+
+#### お題削除
+```
+DELETE /api/joke-topics/{id}
+```
+**認証:** 必要（投稿者のみ）
+
+### ボケ (Jokes)
+
+#### ボケ一覧取得
+```
+GET /api/jokes
+```
+**認証:** 不要
+
+**クエリパラメータ:**
+| パラメータ | 型 | 説明 |
+|-----------|-----|------|
+| page | int | ページ番号 |
+| per_page | int | 1ページあたりの件数 |
+
+**レスポンス:**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "content": "ボケの内容",
+      "joke_topic_id": 1,
+      "user_id": 1,
+      "user": {
+        "id": 1,
+        "name": "投稿者名"
+      },
+      "joke_topic": {
+        "id": 1,
+        "title": "お題タイトル"
+      },
+      "votes_count": 5,
+      "created_at": "2024-01-01T00:00:00.000000Z"
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "last_page": 10,
+    "per_page": 10,
+    "total": 100
+  }
+}
+```
+
+#### ボケ詳細取得
+```
+GET /api/jokes/{id}
+```
+**認証:** 不要
+
+#### お題別ボケ取得
+```
+GET /api/topics/{topicId}/jokes
+```
+**認証:** 不要
+
+#### ボケ作成
+```
+POST /api/jokes/create
+```
+**認証:** 必要
+
+**リクエスト:**
+```json
+{
+  "content": "ボケの内容",
+  "joke_topic_id": 1
+}
+```
+
+**レスポンス:**
+```json
+{
+  "id": 1,
+  "content": "ボケの内容",
+  "joke_topic_id": 1,
+  "user_id": 1,
+  "created_at": "2024-01-01T00:00:00.000000Z"
+}
+```
+
+#### ボケ削除
+```
+DELETE /api/jokes/{id}
+```
+**認証:** 必要（投稿者のみ）
+
+#### ボケ投票
+```
+POST /api/jokes/{id}/vote
+```
+**認証:** 必要
+
+**レスポンス:**
+```json
+{
+  "message": "Vote recorded",
+  "votes_count": 6
+}
+```
+
+## エラーレスポンス
+
+### 認証エラー (401)
+```json
+{
+  "message": "Unauthenticated."
+}
+```
+
+### バリデーションエラー (422)
+```json
+{
+  "message": "The given data was invalid.",
+  "errors": {
+    "email": ["The email field is required."],
+    "password": ["The password must be at least 8 characters."]
+  }
+}
+```
+
+### 権限エラー (403)
+```json
+{
+  "message": "This action is unauthorized."
+}
+```
+
+### Not Found (404)
+```json
+{
+  "message": "Resource not found."
+}
+```
+
+## API呼び出し元一覧
+
+| API | 呼び出し元ページ |
+|-----|----------------|
+| POST /api/register | /auth/register |
+| POST /api/login | /auth/login |
+| POST /api/logout | Header (LoginButtonWrapper) |
+| GET /api/user | /profile, /profile/edit, Header |
+| POST /api/forgot-password | /auth/forgot-password |
+| POST /api/reset-password | /auth/reset-password |
+| GET /api/profile | /profile |
+| POST /api/profile | /profile/edit |
+| GET /api/joke-topics | /, /joke_topic/list |
+| GET /api/joke-topics/{id} | /joke_topic/[id] |
+| POST /api/joke-topics | /joke_topic/create |
+| GET /api/jokes | /, /jokes |
+| POST /api/jokes/create | /joke_topic/[id] |
+| POST /api/jokes/{id}/vote | /, /joke_topic/[id], /jokes |
