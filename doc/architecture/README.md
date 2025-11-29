@@ -40,7 +40,7 @@
 ## プロジェクト構成
 
 ```
-next-laravel/
+bokemasho/
 ├── src/
 │   ├── frontend/          # Next.js フロントエンド
 │   │   ├── app/           # App Router
