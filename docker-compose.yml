@@ -1,11 +1,11 @@
 version: "3"
 
 services:
-  next-laravel-frontend:
+  bokemasho-frontend:
     build:
       context: .
       dockerfile: ./docker/node/Dockerfile
-    container_name: next-laravel-frontend
+    container_name: bokemasho-frontend
     volumes:
       - ./src/frontend:/app
       - /etc/passwd:/etc/passwd:ro
@@ -15,11 +15,11 @@ services:
       - "${IP}:3000:3000"
     tty: true
 
-  next-laravel-backend:
+  bokemasho-backend:
     build:
       context: .
       dockerfile: ./docker/php/Dockerfile
-    container_name: next-laravel-backend
+    container_name: bokemasho-backend
     volumes:
       - ./src/backend:/app
       - ./docker/php/php.ini:/usr/local/etc/php/php.ini
@@ -28,11 +28,11 @@ services:
       - "${IP}:8080:8080"
     tty: true
 
-  next-laravel-nginx:
+  bokemasho-nginx:
     build:
       context: .
       dockerfile: ./docker/nginx/Dockerfile
-    container_name: next-laravel_web
+    container_name: bokemasho_web
     ports:
       - "${IP}:80:80"
     environment:
@@ -41,56 +41,56 @@ services:
       - ./src:/src
       - ./nginx_log/:/var/log/nginx
 
-  next-laravel_db:
+  bokemasho_db:
     build: ./docker/mysql
     volumes:
-      - db-store_next-laravel:/var/lib/mysql
+      - db-store_bokemasho:/var/lib/mysql
     ports:
       - "${IP}:13306:3306"
     environment:
       TZ: Asia/Tokyo
-    container_name: next-laravel_db
+    container_name: bokemasho_db
 
-  next-laravel-phpmyadmin:
+  bokemasho-phpmyadmin:
     image: phpmyadmin/phpmyadmin
     environment:
-      - PMA_HOST=next-laravel_db
+      - PMA_HOST=bokemasho_db
       - PMA_USER=hiro
       - PMA_PASSWORD=pass
     ports:
       - "${IP}:4400:80"
     depends_on:
-      - next-laravel_db
-    container_name: next-laravel_phpmyadmin
+      - bokemasho_db
+    container_name: bokemasho_phpmyadmin
 
-  next-laravel_db_test:
+  bokemasho_db_test:
     build: ./docker/mysql-test
     volumes:
-      - db-store_next-laravel_test:/var/lib/mysql
+      - db-store_bokemasho_test:/var/lib/mysql
     ports:
       - "${IP}:3307:3306"
     environment:
       TZ: Asia/Tokyo
-    container_name: next-laravel_db_test
+    container_name: bokemasho_db_test
 
-  next-laravel-phpmyadmin_test:
+  bokemasho-phpmyadmin_test:
     image: phpmyadmin/phpmyadmin
     environment:
-      - PMA_HOST=next-laravel_db_test
+      - PMA_HOST=bokemasho_db_test
       - PMA_USER=hiro
       - PMA_PASSWORD=pass
     ports:
       - "${IP}:8889:80"
     depends_on:
-      - next-laravel_db_test
-    container_name: next-laravel_phpmyadmin_test
+      - bokemasho_db_test
+    container_name: bokemasho_phpmyadmin_test
 
   mailhog:
     image: mailhog/mailhog
     ports:
       - "${IP}:8025:8025"
-    container_name: next-laravel_mailhog
+    container_name: bokemasho_mailhog
 
 volumes:
-  db-store_next-laravel:
-  db-store_next-laravel_test:
+  db-store_bokemasho:
+  db-store_bokemasho_test:

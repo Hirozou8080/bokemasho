@@ -1,6 +1,6 @@
 FROM mysql/mysql-server:8.0
 
-ENV MYSQL_DATABASE=next-laravel_test \
+ENV MYSQL_DATABASE=bokemasho_test \
     MYSQL_USER=pass \
     MYSQL_PASSWORD=pass \
     MYSQL_ROOT_PASSWORD=pass \
