@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import MainLayout from "@/app/components/templates/MainLayout";
@@ -39,7 +39,7 @@ const messages = {
   },
 };
 
-export default function CompletePage() {
+function CompletePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [messageType, setMessageType] = useState("default");
@@ -100,5 +100,30 @@ export default function CompletePage() {
         </Paper>
       </Box>
     </MainLayout>
+  );
+}
+
+export default function CompletePage() {
+  return (
+    <Suspense
+      fallback={
+        <MainLayout>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              mt: 8,
+            }}
+          >
+            <Typography variant="h4" component="h1">
+              読み込み中...
+            </Typography>
+          </Box>
+        </MainLayout>
+      }
+    >
+      <CompletePageContent />
+    </Suspense>
   );
 }

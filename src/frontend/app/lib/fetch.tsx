@@ -11,7 +11,7 @@ export async function fetchPost(props: any) {
     postData = {}, // ポストデータ
     file = false, // ファイル送信時
   } = props;
-  const baseUrl = process.browser
+  const baseUrl = typeof window !== 'undefined'
     ? process.env.NEXT_PUBLIC_BACKEND_URL
     : process.env.NEXT_PUBLIC_BACKEND_CONTAINER_URL;
 
@@ -35,7 +35,7 @@ export async function fetchGet(props: any) {
     url = "", // API疎通URL
     cache = "force-cache",
   } = props;
-  const baseUrl = process.browser
+  const baseUrl = typeof window !== 'undefined'
     ? process.env.NEXT_PUBLIC_BACKEND_URL
     : process.env.NEXT_PUBLIC_BACKEND_CONTAINER_URL;
 
