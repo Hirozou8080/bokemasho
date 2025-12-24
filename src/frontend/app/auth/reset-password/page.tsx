@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { resetPassword } from "@/app/lib/auth";
 import MainLayout from "@/app/components/templates/MainLayout";
@@ -9,7 +9,7 @@ import Typography from "@/app/components/atoms/Typography";
 import TextField from "@/app/components/atoms/TextField";
 import Button from "@/app/components/atoms/Button";
 
-export default function ResetPasswordPage() {
+function ResetPasswordPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -128,5 +128,30 @@ export default function ResetPasswordPage() {
         </Paper>
       </Box>
     </MainLayout>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <MainLayout>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              mt: 8,
+            }}
+          >
+            <Typography variant="h4" component="h1">
+              読み込み中...
+            </Typography>
+          </Box>
+        </MainLayout>
+      }
+    >
+      <ResetPasswordPageContent />
+    </Suspense>
   );
 }
