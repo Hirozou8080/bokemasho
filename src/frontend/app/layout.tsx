@@ -1,11 +1,18 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import ThemeRegistry from "./theme-registry";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import icon from "@/public/images/robot-logo.png";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#ffffff",
+};
 
 export const metadata: Metadata = {
   title: {
@@ -37,12 +44,6 @@ export const metadata: Metadata = {
     follow: true,
     nocache: true,
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
-  themeColor: "#ffffff",
   alternates: {
     canonical: "https://bokemasho.hirokilab.com/",
   },
