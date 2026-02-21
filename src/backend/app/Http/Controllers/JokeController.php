@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 use App\Models\{
     Category,
@@ -78,22 +79,56 @@ class JokeController extends Controller
     {
         try {
             $user_id = $request->query('user_id');
-            $jokes = Joke::with('user', 'topic', 'categories')
-                ->withCount('votes')
-                ->orderBy('priority', 'desc')
-                ->orderBy('created_at', 'desc')
-                ->paginate(12);
+            $sort = $request->query('sort', 'latest'); // デフォルトは新着順
+
+            $query = Joke::with('user', 'topic', 'categories')
+                ->withCount('votes');
+
+            // ソート順を設定
+            if ($sort === 'popular') {
+                // 人気順：過去1週間のいいね数降順、同数の場合は新着順
+                $oneWeekAgo = now()->subWeek();
+                $query->withCount(['votes as weekly_votes_count' => function ($q) use ($oneWeekAgo) {
+                    $q->where('created_at', '>=', $oneWeekAgo);
+                }])
+                    ->orderBy('weekly_votes_count', 'desc')
+                    ->orderBy('created_at', 'desc');
+            } elseif ($sort === 'ranking') {
+                // ランキング：全期間のいいね数降順、同数の場合は新着順
+                $query->orderBy('votes_count', 'desc')
+                    ->orderBy('created_at', 'desc');
+            } else {
+                // 新着順（デフォルト）
+                $query->orderBy('priority', 'desc')
+                    ->orderBy('created_at', 'desc');
+            }
+
+            $jokes = $query->paginate(12);
 
             if ($user_id) {
-                $jokes->getCollection()->transform(function ($joke) use ($user_id) {
+                $collection = collect($jokes->items())->map(function ($joke) use ($user_id) {
                     $joke->has_voted = $joke->votes->contains('user_id', $user_id);
                     return $joke;
                 });
+                $jokes = new LengthAwarePaginator(
+                    $collection,
+                    $jokes->total(),
+                    $jokes->perPage(),
+                    $jokes->currentPage(),
+                    ['path' => $request->url(), 'query' => $request->query()]
+                );
             } else {
-                $jokes->getCollection()->transform(function ($joke) {
+                $collection = collect($jokes->items())->map(function ($joke) {
                     $joke->has_voted = false;
                     return $joke;
                 });
+                $jokes = new LengthAwarePaginator(
+                    $collection,
+                    $jokes->total(),
+                    $jokes->perPage(),
+                    $jokes->currentPage(),
+                    ['path' => $request->url(), 'query' => $request->query()]
+                );
             }
 
             return response()->json([

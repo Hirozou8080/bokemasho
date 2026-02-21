@@ -11,10 +11,12 @@ import {
   Paper,
   Pagination,
   Fab,
+  Tabs,
+  Tab,
 } from "@mui/material";
-import { ArrowBack, EmojiEmotions } from "@mui/icons-material";
+import { ArrowBack, EmojiEmotions, TrendingUp, Schedule, EmojiEvents } from "@mui/icons-material";
 import Link from "next/link";
-import { getUser, getToken } from "@/app/lib/auth";
+import { getToken, getUserData } from "@/app/lib/auth";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -49,6 +51,8 @@ interface User {
   id: number;
 }
 
+type SortType = "latest" | "popular" | "ranking";
+
 export default function JokesPage() {
   const [jokes, setJokes] = useState<Joke[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,30 +60,35 @@ export default function JokesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [user, setUser] = useState<User | null>(null);
+  const [userInitialized, setUserInitialized] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [sortType, setSortType] = useState<SortType>("latest");
   const router = useRouter();
 
+  // クライアントサイドでユーザー情報を取得
   useEffect(() => {
-    const fetchUser = async () => {
-      const response = await getUser();
-      if (response && response.user) {
-        setUser(response.user);
-      }
-    };
-
-    fetchUser();
+    const cachedUser = getUserData();
+    setUser(cachedUser);
+    setUserInitialized(true);
   }, []);
 
+  // ボケ一覧を取得（ユーザー情報取得後）
   useEffect(() => {
+    if (!userInitialized) return;
     const fetchJokes = async () => {
       try {
         setLoading(true);
         const API_URL =
           process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
+        const params = new URLSearchParams({
+          page: page.toString(),
+          sort: sortType,
+        });
+        if (user?.id) {
+          params.append("user_id", user.id.toString());
+        }
         const response = await fetch(
-          user
-            ? `${API_URL}/jokes?page=${page}&user_id=${user.id}`
-            : `${API_URL}/jokes?page=${page}`,
+          `${API_URL}/jokes?${params.toString()}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -93,26 +102,11 @@ export default function JokesPage() {
           throw new Error("ボケの取得に失敗しました");
         }
 
-        // レスポンスをテキストとして取得し、JSON構文解析エラーに備える
-        const responseText = await response.text();
-        let data;
-
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error("JSON parse error:", parseError, responseText);
-          throw new Error("レスポンスの解析に失敗しました");
-        }
+        const data = await response.json();
 
         if (data.data && data.data.data) {
           setJokes(data.data.data);
           setTotalPages(data.data.last_page || 1);
-          console.log("Pagination info:", {
-            currentPage: data.data.current_page,
-            lastPage: data.data.last_page,
-            total: data.data.total,
-            perPage: data.data.per_page
-          });
         } else if (data.data) {
           setJokes(data.data);
           setTotalPages(1);
@@ -132,7 +126,7 @@ export default function JokesPage() {
     };
 
     fetchJokes();
-  }, [page, user]);
+  }, [page, sortType, userInitialized, user]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -140,6 +134,11 @@ export default function JokesPage() {
   ) => {
     setPage(value);
     window.scrollTo(0, 0);
+  };
+
+  const handleSortChange = (event: React.SyntheticEvent, newValue: SortType) => {
+    setSortType(newValue);
+    setPage(1); // ソート変更時はページを1に戻す
   };
 
   // 投票処理
@@ -207,6 +206,37 @@ export default function JokesPage() {
           >
             ホームに戻る
           </Button>
+        </Box>
+
+        <Box sx={{ mb: 3 }}>
+          <Tabs
+            value={sortType}
+            onChange={handleSortChange}
+            indicatorColor="primary"
+            textColor="primary"
+          >
+            <Tab
+              value="latest"
+              label="新着"
+              icon={<Schedule />}
+              iconPosition="start"
+              sx={{ fontWeight: 600 }}
+            />
+            <Tab
+              value="popular"
+              label="人気"
+              icon={<TrendingUp />}
+              iconPosition="start"
+              sx={{ fontWeight: 600 }}
+            />
+            <Tab
+              value="ranking"
+              label="ランキング"
+              icon={<EmojiEvents />}
+              iconPosition="start"
+              sx={{ fontWeight: 600 }}
+            />
+          </Tabs>
         </Box>
 
         {loading ? (
