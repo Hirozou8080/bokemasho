@@ -345,6 +345,29 @@ DELETE /api/joke-topics/{id}
 ```
 **認証:** 必要（投稿者のみ）
 
+### カテゴリ (Categories)
+
+#### カテゴリ一覧取得（サジェスト用）
+```
+GET /api/categories
+```
+**認証:** 不要
+
+**クエリパラメータ:**
+| パラメータ | 型 | 説明 |
+|-----------|-----|------|
+| search | string | 検索キーワード（部分一致） |
+
+**レスポンス:**
+```json
+{
+  "data": [
+    { "id": 1, "name": "シュール" },
+    { "id": 2, "name": "下ネタ" }
+  ]
+}
+```
+
 ### ボケ (Jokes)
 
 #### ボケ一覧取得
@@ -376,6 +399,9 @@ GET /api/jokes
         "id": 1,
         "title": "お題タイトル"
       },
+      "categories": [
+        { "id": 1, "name": "シュール" }
+      ],
       "votes_count": 5,
       "created_at": "2024-01-01T00:00:00.000000Z"
     }
@@ -411,9 +437,14 @@ POST /api/jokes/create
 ```json
 {
   "content": "ボケの内容",
-  "joke_topic_id": 1
+  "joke_topic_id": 1,
+  "categories": ["シュール", "天然ボケ"]
 }
 ```
+
+**備考:**
+- `categories`は任意で、最大3つまで指定可能
+- 新しいカテゴリ名を指定すると自動的に作成される
 
 **レスポンス:**
 ```json
@@ -422,6 +453,10 @@ POST /api/jokes/create
   "content": "ボケの内容",
   "joke_topic_id": 1,
   "user_id": 1,
+  "categories": [
+    { "id": 1, "name": "シュール" },
+    { "id": 2, "name": "天然ボケ" }
+  ],
   "created_at": "2024-01-01T00:00:00.000000Z"
 }
 ```
@@ -500,3 +535,4 @@ POST /api/jokes/{id}/vote
 | GET /api/jokes | /, /jokes |
 | POST /api/jokes/create | /joke_topic/[id] |
 | POST /api/jokes/{id}/vote | /, /joke_topic/[id], /jokes |
+| GET /api/categories | /joke_topic/[id] (サジェスト用) |
