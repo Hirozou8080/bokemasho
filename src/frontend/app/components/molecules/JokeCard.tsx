@@ -107,8 +107,11 @@ export default function JokeCard({ joke, onVote, actionLabel = "このお題で�
                 key={category.id}
                 label={category.name}
                 size="small"
-                variant="outlined"
-                color="primary"
+                sx={{
+                  borderRadius: 1,
+                  bgcolor: "primary.main",
+                  color: "primary.contrastText",
+                }}
               />
             ))}
         </Box>
@@ -149,7 +152,7 @@ export default function JokeCard({ joke, onVote, actionLabel = "このお題で�
       </CardContent>
       <Divider />
       <CardActions>
-        <Button size="small" component={Link} href={`/joke_topic/${joke.topic.id}`}>
+        <Button size="small" color="primary" sx={{ fontWeight: 600 }} component={Link} href={`/joke_topic/${joke.topic.id}`}>
           {actionLabel}
         </Button>
       </CardActions>

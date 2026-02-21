@@ -381,6 +381,8 @@ GET /api/jokes
 |-----------|-----|------|
 | page | int | ページ番号 |
 | per_page | int | 1ページあたりの件数 |
+| sort | string | ソート順（`latest`: 新着順（デフォルト）, `popular`: 人気順（過去1週間のいいね数降順）, `ranking`: ランキング（全期間のいいね数降順）） |
+| user_id | int | ユーザーID（投票状態取得用） |
 
 **レスポンス:**
 ```json

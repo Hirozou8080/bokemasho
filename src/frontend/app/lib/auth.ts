@@ -10,6 +10,7 @@ const API_URL =
 // =======================
 
 const TOKEN_KEY = "access_token";
+const USER_KEY = "user_data";
 
 export const getToken = (): string | null => {
   if (typeof window === "undefined") return null;
@@ -24,6 +25,26 @@ export const setToken = (token: string) => {
 export const clearToken = () => {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+};
+
+// ユーザー情報をlocalStorageに保存
+export const setUserData = (user: any) => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+};
+
+// ユーザー情報をlocalStorageから取得
+export const getUserData = (): any | null => {
+  if (typeof window === "undefined") return null;
+  const data = localStorage.getItem(USER_KEY);
+  return data ? JSON.parse(data) : null;
+};
+
+// ユーザー情報をクリア
+export const clearUserData = () => {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(USER_KEY);
 };
 
 // 認証ヘッダー生成
@@ -70,6 +91,7 @@ export const login = async (email: string, password: string): Promise<any> => {
 
   const data = await response.json();
   if (data.token) setToken(data.token);
+  if (data.user) setUserData(data.user);
   return data;
 };
 
@@ -90,17 +112,38 @@ export const logout = async (): Promise<any> => {
   return response.json();
 };
 
-// ユーザー情報取得
-export const getUser = async (): Promise<any> => {
+// ユーザー情報取得（キャッシュ優先）
+export const getUser = async (forceRefresh = false): Promise<any> => {
+  // キャッシュがあり、強制リフレッシュでなければキャッシュを返す
+  if (!forceRefresh) {
+    const cachedUser = getUserData();
+    if (cachedUser) {
+      return { user: cachedUser };
+    }
+  }
+
+  // トークンがなければnullを返す
+  const token = getToken();
+  if (!token) {
+    return null;
+  }
+
   const response = await fetch(`${API_URL}/user`, {
     headers: jsonHeaders(),
   });
 
   if (!response.ok) {
+    // 認証エラーの場合はキャッシュもクリア
+    if (response.status === 401) {
+      clearToken();
+    }
     return null;
   }
 
-  return response.json();
+  const data = await response.json();
+  // レスポンスをキャッシュに保存
+  setUserData(data);
+  return { user: data };
 };
 
 // パスワードリセットメール送信

@@ -17,6 +17,7 @@ import {
   CardContent,
   Divider,
   Chip,
+  Autocomplete,
 } from "@mui/material";
 import { Send, ArrowBack } from "@mui/icons-material";
 import Link from "next/link";
@@ -363,101 +364,54 @@ export default function JokeResponsePage() {
               helperText={`${jokeText.length}/60文字`}
             />
 
-            {/* 選択済みタグ表示 */}
-            <Box sx={{ mt: 2, mb: 1 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                カテゴリ（タグ）- 最大3つ
-              </Typography>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, minHeight: 32 }}>
-                {categories.map((tag) => (
+            {/* カテゴリ入力（Autocomplete） */}
+            <Autocomplete
+              multiple
+              freeSolo
+              options={categoryOptions.filter((opt) => !categories.includes(opt))}
+              value={categories}
+              onChange={(_, newValue) => {
+                // 最大3つまで、各タグ最大6文字
+                const filtered = newValue
+                  .map((v) => v.slice(0, 6))
+                  .filter((v, i, arr) => arr.indexOf(v) === i)
+                  .slice(0, 3);
+                setCategories(filtered);
+              }}
+              inputValue={categoryInput}
+              onInputChange={(_, newInputValue) => {
+                setCategoryInput(newInputValue.slice(0, 6));
+              }}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
                   <Chip
-                    key={tag}
-                    label={tag}
-                    onDelete={() => setCategories(categories.filter((t) => t !== tag))}
+                    {...getTagProps({ index })}
+                    key={option}
+                    label={option}
                     size="medium"
-                    color="primary"
+                    sx={{
+                      borderRadius: 1,
+                      bgcolor: "primary.main",
+                      color: "primary.contrastText",
+                      "& .MuiChip-deleteIcon": {
+                        color: "primary.contrastText",
+                      },
+                    }}
                   />
-                ))}
-                {categories.length === 0 && (
-                  <Typography variant="body2" color="text.disabled">
-                    タグが未設定です
-                  </Typography>
-                )}
-              </Box>
-            </Box>
-
-            {/* タグ入力フィールド */}
-            {categories.length < 3 && (
-              <TextField
-                label="タグを入力"
-                value={categoryInput}
-                onChange={(e) => setCategoryInput(e.target.value.slice(0, 6))}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                  }
-                }}
-                margin="normal"
-                fullWidth
-                placeholder="タグを入力してください"
-                helperText={`${categoryInput.length}/6文字 - 入力後、下のボタンをタップで追加`}
-                inputProps={{ maxLength: 6 }}
-                size="medium"
-              />
-            )}
-
-            {/* 入力中のタグをタップで追加（スマホ向け） */}
-            {categoryInput.trim() && categories.length < 3 && (
-              <Box sx={{ mt: 1 }}>
-                <Chip
-                  label={`「${categoryInput.trim()}」を追加`}
-                  onClick={() => {
-                    const newTag = categoryInput.trim();
-                    if (newTag && !categories.includes(newTag)) {
-                      setCategories([...categories, newTag]);
-                      setCategoryInput("");
-                    }
-                  }}
-                  color="secondary"
-                  variant="outlined"
-                  sx={{
-                    cursor: "pointer",
-                    fontSize: "1rem",
-                    py: 2,
-                    "& .MuiChip-label": { px: 2 }
-                  }}
+                ))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="カテゴリ（タグ）"
+                  placeholder={categories.length >= 3 ? "最大3つまで" : "タグを入力..."}
+                  helperText={`${categories.length}/3タグ${categoryInput ? ` - 入力中: ${categoryInput.length}/6文字` : ""}`}
+                  margin="normal"
                 />
-              </Box>
-            )}
-
-            {/* サジェスト候補 */}
-            {categories.length < 3 && categoryOptions.length > 0 && (
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="caption" color="text.secondary">
-                  おすすめタグ:
-                </Typography>
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 0.5 }}>
-                  {categoryOptions
-                    .filter((opt) => !categories.includes(opt))
-                    .slice(0, 6)
-                    .map((option) => (
-                      <Chip
-                        key={option}
-                        label={option}
-                        onClick={() => {
-                          if (categories.length < 3) {
-                            setCategories([...categories, option]);
-                            setCategoryInput("");
-                          }
-                        }}
-                        variant="outlined"
-                        size="medium"
-                        sx={{ cursor: "pointer" }}
-                      />
-                    ))}
-                </Box>
-              </Box>
-            )}
+              )}
+              noOptionsText="該当するタグがありません"
+              sx={{ mt: 1 }}
+            />
 
             <Box
               sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}

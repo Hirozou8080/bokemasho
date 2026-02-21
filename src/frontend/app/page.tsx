@@ -4,27 +4,15 @@ import React, { useState, useEffect } from "react";
 import MainLayout from "./components/templates/MainLayout";
 import Typography from "./components/atoms/Typography";
 import { getUser, getToken } from "@/app/lib/auth";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import { useRouter } from "next/navigation";
-
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Stack,
-  Card,
-  CardContent,
-  CardActions,
-  Avatar,
-  Paper,
-  CardMedia,
-} from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { EmojiEmotions, ArrowForward } from "@mui/icons-material";
 import Link from "next/link";
 import JokeCard from "./components/molecules/JokeCard";
+import JokeCardSkeleton from "./components/molecules/JokeCardSkeleton";
+import TopicCard from "./components/molecules/TopicCard";
+import TopicCardSkeleton from "./components/molecules/TopicCardSkeleton";
+import LoginRequiredDialog from "./components/molecules/LoginRequiredDialog";
+import CardGrid from "./components/organisms/CardGrid";
 
 interface Category {
   id: number;
@@ -75,7 +63,6 @@ export default function Home() {
   const [topicsError, setTopicsError] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [openModal, setOpenModal] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -285,35 +272,21 @@ export default function Home() {
             href="/jokes"
             endIcon={<ArrowForward />}
             color="primary"
+            sx={{ fontWeight: 600 }}
           >
             すべて見る
           </Button>
         </Box>
 
-        {jokesLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : jokesError ? (
-          <Paper sx={{ p: 3, textAlign: "center", mb: 3 }}>
-            <Typography color="error">{jokesError}</Typography>
-          </Paper>
-        ) : jokes.length === 0 ? (
-          <Paper sx={{ p: 3, textAlign: "center", mb: 3 }}>
-            <Typography>まだボケがありません</Typography>
-          </Paper>
-        ) : (
-          <Stack direction="row" spacing={3} useFlexGap flexWrap="wrap">
-            {jokes.slice(0, 6).map((joke) => (
-              <Box
-                key={joke.id}
-                sx={{ width: { xs: "100%", sm: "48%", md: "31%" }, mb: 3 }}
-              >
-                <JokeCard joke={joke} onVote={handleVote} />
-              </Box>
-            ))}
-          </Stack>
-        )}
+        <CardGrid
+          items={jokes.slice(0, 6)}
+          loading={jokesLoading}
+          error={jokesError}
+          emptyMessage="まだボケがありません"
+          skeletonCount={6}
+          renderItem={(joke) => <JokeCard joke={joke} onVote={handleVote} />}
+          renderSkeleton={() => <JokeCardSkeleton />}
+        />
       </Box>
 
       <Box sx={{ mt: 6, mb: 4 }}>
@@ -333,96 +306,28 @@ export default function Home() {
             href="/joke_topic/list"
             endIcon={<ArrowForward />}
             color="primary"
+            sx={{ fontWeight: 600 }}
           >
             すべて見る
           </Button>
         </Box>
 
-        {topicsLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : topicsError ? (
-          <Paper sx={{ p: 3, textAlign: "center", mb: 3 }}>
-            <Typography color="error">{topicsError}</Typography>
-          </Paper>
-        ) : topics.length === 0 ? (
-          <Paper sx={{ p: 3, textAlign: "center", mb: 3 }}>
-            <Typography>まだボケお題がありません</Typography>
-          </Paper>
-        ) : (
-          <Stack spacing={3} direction="row" useFlexGap flexWrap="wrap">
-            {topics.slice(0, 3).map((topic) => (
-              <Box
-                key={topic.id}
-                sx={{ width: { xs: "100%", sm: "48%", md: "30%" }, mb: 3 }}
-              >
-                <Card
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={
-                      topic.image_path
-                        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/storage/${topic.image_path}`
-                        : "https://placehold.co/600x400?text=No+Image"
-                    }
-                    alt="ボケお題画像"
-                    sx={{
-                      height: 200,
-                      objectFit: "contain",
-                      bgcolor: "grey.100",
-                    }}
-                  />
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      投稿者: {topic.user?.username || "不明"}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      component="p"
-                    >
-                      {new Date(topic.created_at).toLocaleDateString("ja-JP")}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button
-                      size="small"
-                      color="primary"
-                      component={Link}
-                      href={`/joke_topic/${topic.id}`}
-                    >
-                      このお題でボケる
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Box>
-            ))}
-          </Stack>
-        )}
+        <CardGrid
+          items={topics.slice(0, 3)}
+          loading={topicsLoading}
+          error={topicsError}
+          emptyMessage="まだボケお題がありません"
+          skeletonCount={3}
+          renderItem={(topic) => <TopicCard topic={topic} />}
+          renderSkeleton={() => <TopicCardSkeleton />}
+          columns={{ xs: "100%", sm: "48%", md: "30%" }}
+        />
       </Box>
-      <Dialog open={openModal} onClose={() => setOpenModal(false)}>
-        <DialogTitle>ログインが必要です</DialogTitle>
-        <DialogContent>グッドを押すにはログインをしてください。</DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenModal(false)}>閉じる</Button>
-          <Button
-            onClick={() => {
-              setOpenModal(false);
-              router.push("/auth/login");
-            }}
-            color="primary"
-            variant="contained"
-          >
-            ログインページへ
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <LoginRequiredDialog
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        message="グッドを押すにはログインをしてください。"
+      />
     </MainLayout>
   );
 }

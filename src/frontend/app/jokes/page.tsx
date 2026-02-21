@@ -6,21 +6,18 @@ import Typography from "../components/atoms/Typography";
 import {
   Box,
   Button,
-  CircularProgress,
-  Stack,
-  Paper,
   Pagination,
   Fab,
+  Tabs,
+  Tab,
 } from "@mui/material";
-import { ArrowBack, EmojiEmotions } from "@mui/icons-material";
+import { ArrowBack, EmojiEmotions, TrendingUp, Schedule, EmojiEvents } from "@mui/icons-material";
 import Link from "next/link";
-import { getUser, getToken } from "@/app/lib/auth";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import { useRouter } from "next/navigation";
+import { getToken, getUserData } from "@/app/lib/auth";
 import JokeCard from "../components/molecules/JokeCard";
+import JokeCardSkeleton from "../components/molecules/JokeCardSkeleton";
+import LoginRequiredDialog from "../components/molecules/LoginRequiredDialog";
+import CardGrid from "../components/organisms/CardGrid";
 
 interface Category {
   id: number;
@@ -49,6 +46,8 @@ interface User {
   id: number;
 }
 
+type SortType = "latest" | "popular" | "ranking";
+
 export default function JokesPage() {
   const [jokes, setJokes] = useState<Joke[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,30 +55,34 @@ export default function JokesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [user, setUser] = useState<User | null>(null);
+  const [userInitialized, setUserInitialized] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const router = useRouter();
+  const [sortType, setSortType] = useState<SortType>("latest");
 
+  // クライアントサイドでユーザー情報を取得
   useEffect(() => {
-    const fetchUser = async () => {
-      const response = await getUser();
-      if (response && response.user) {
-        setUser(response.user);
-      }
-    };
-
-    fetchUser();
+    const cachedUser = getUserData();
+    setUser(cachedUser);
+    setUserInitialized(true);
   }, []);
 
+  // ボケ一覧を取得（ユーザー情報取得後）
   useEffect(() => {
+    if (!userInitialized) return;
     const fetchJokes = async () => {
       try {
         setLoading(true);
         const API_URL =
           process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
+        const params = new URLSearchParams({
+          page: page.toString(),
+          sort: sortType,
+        });
+        if (user?.id) {
+          params.append("user_id", user.id.toString());
+        }
         const response = await fetch(
-          user
-            ? `${API_URL}/jokes?page=${page}&user_id=${user.id}`
-            : `${API_URL}/jokes?page=${page}`,
+          `${API_URL}/jokes?${params.toString()}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -93,26 +96,11 @@ export default function JokesPage() {
           throw new Error("ボケの取得に失敗しました");
         }
 
-        // レスポンスをテキストとして取得し、JSON構文解析エラーに備える
-        const responseText = await response.text();
-        let data;
-
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error("JSON parse error:", parseError, responseText);
-          throw new Error("レスポンスの解析に失敗しました");
-        }
+        const data = await response.json();
 
         if (data.data && data.data.data) {
           setJokes(data.data.data);
           setTotalPages(data.data.last_page || 1);
-          console.log("Pagination info:", {
-            currentPage: data.data.current_page,
-            lastPage: data.data.last_page,
-            total: data.data.total,
-            perPage: data.data.per_page
-          });
         } else if (data.data) {
           setJokes(data.data);
           setTotalPages(1);
@@ -132,7 +120,7 @@ export default function JokesPage() {
     };
 
     fetchJokes();
-  }, [page, user]);
+  }, [page, sortType, userInitialized, user]);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -140,6 +128,11 @@ export default function JokesPage() {
   ) => {
     setPage(value);
     window.scrollTo(0, 0);
+  };
+
+  const handleSortChange = (event: React.SyntheticEvent, newValue: SortType) => {
+    setSortType(newValue);
+    setPage(1); // ソート変更時はページを1に戻す
   };
 
   // 投票処理
@@ -209,45 +202,63 @@ export default function JokesPage() {
           </Button>
         </Box>
 
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 8, mb: 8 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Paper sx={{ p: 3, textAlign: "center", mb: 3 }}>
-            <Typography color="error">{error}</Typography>
-          </Paper>
-        ) : jokes.length === 0 ? (
-          <Paper sx={{ p: 3, textAlign: "center", mb: 3 }}>
-            <Typography>まだボケがありません</Typography>
-          </Paper>
-        ) : (
-          <>
-            <Stack direction="row" spacing={3} useFlexGap flexWrap="wrap">
-              {jokes.map((joke) => (
-                <Box
-                  key={joke.id}
-                  sx={{ width: { xs: "100%", sm: "48%", md: "31%" }, mb: 3 }}
-                >
-                  <JokeCard joke={joke} onVote={handleVote} actionLabel="このお題でボケる" />
-                </Box>
-              ))}
-            </Stack>
+        <Box sx={{ mb: 3 }}>
+          <Tabs
+            value={sortType}
+            onChange={handleSortChange}
+            indicatorColor="primary"
+            textColor="primary"
+          >
+            <Tab
+              value="latest"
+              label="新着"
+              icon={<Schedule />}
+              iconPosition="start"
+              sx={{ fontWeight: 600 }}
+            />
+            <Tab
+              value="popular"
+              label="人気"
+              icon={<TrendingUp />}
+              iconPosition="start"
+              sx={{ fontWeight: 600 }}
+            />
+            <Tab
+              value="ranking"
+              label="ランキング"
+              icon={<EmojiEvents />}
+              iconPosition="start"
+              sx={{ fontWeight: 600 }}
+            />
+          </Tabs>
+        </Box>
 
-            <Box
-              sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}
-            >
-              <Pagination
-                count={totalPages}
-                page={page}
-                onChange={handlePageChange}
-                color="primary"
-                size="large"
-                showFirstButton
-                showLastButton
-              />
-            </Box>
-          </>
+        <CardGrid
+          items={jokes}
+          loading={loading}
+          error={error}
+          emptyMessage="まだボケがありません"
+          skeletonCount={6}
+          renderItem={(joke) => (
+            <JokeCard joke={joke} onVote={handleVote} actionLabel="このお題でボケる" />
+          )}
+          renderSkeleton={() => <JokeCardSkeleton />}
+        />
+
+        {!loading && !error && jokes.length > 0 && (
+          <Box
+            sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}
+          >
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+              showFirstButton
+              showLastButton
+            />
+          </Box>
         )}
       </Box>
 
@@ -271,23 +282,11 @@ export default function JokesPage() {
         ボケる
       </Fab>
 
-      <Dialog open={openModal} onClose={() => setOpenModal(false)}>
-        <DialogTitle>ログインが必要です</DialogTitle>
-        <DialogContent>グッドを押すにはログインをしてください。</DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenModal(false)}>閉じる</Button>
-          <Button
-            onClick={() => {
-              setOpenModal(false);
-              router.push("/auth/login");
-            }}
-            color="primary"
-            variant="contained"
-          >
-            ログインページへ
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <LoginRequiredDialog
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        message="グッドを押すにはログインをしてください。"
+      />
     </MainLayout>
   );
 }
