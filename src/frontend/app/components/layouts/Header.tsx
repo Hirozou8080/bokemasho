@@ -1,8 +1,11 @@
+"use client";
+
 import React from "react";
 import { AppBar, Box, Toolbar, Button, ButtonGroup } from "@mui/material";
 import Typography from "../atoms/Typography";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { LoginButtonWrapper } from "./LoginButtonWrapper";
 import {
   AddCircleOutline,
@@ -11,7 +14,31 @@ import {
   EmojiEmotions,
 } from "@mui/icons-material";
 
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  color: "primary" | "secondary";
+  exact?: boolean;
+}
+
 export function Header() {
+  const pathname = usePathname();
+
+  const navItems: NavItem[] = [
+    { href: "/", label: "ホーム", icon: <Home />, color: "primary", exact: true },
+    { href: "/joke_topic/list", label: "お題一覧", icon: <ListAlt />, color: "primary" },
+    { href: "/jokes", label: "ボケ一覧", icon: <EmojiEmotions />, color: "primary" },
+    { href: "/joke_topic/create", label: "お題を投稿", icon: <AddCircleOutline />, color: "secondary" },
+  ];
+
+  const isActive = (href: string, exact?: boolean) => {
+    if (exact) {
+      return pathname === href;
+    }
+    return pathname.startsWith(href);
+  };
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -52,38 +79,32 @@ export function Header() {
           variant="contained"
           sx={{ mr: 2, display: { xs: "none", sm: "flex" } }}
         >
-          <Button
-            component={Link}
-            href="/"
-            startIcon={<Home />}
-            color="primary"
-          >
-            ホーム
-          </Button>
-          <Button
-            component={Link}
-            href="/joke_topic/list"
-            startIcon={<ListAlt />}
-            color="primary"
-          >
-            お題一覧
-          </Button>
-          <Button
-            component={Link}
-            href="/jokes"
-            startIcon={<EmojiEmotions />}
-            color="primary"
-          >
-            ボケ一覧
-          </Button>
-          <Button
-            component={Link}
-            href="/joke_topic/create"
-            startIcon={<AddCircleOutline />}
-            color="secondary"
-          >
-            お題を投稿
-          </Button>
+          {navItems.map((item) => {
+            const active = isActive(item.href, item.exact);
+            return (
+              <Button
+                key={item.href}
+                component={Link}
+                href={item.href}
+                startIcon={item.icon}
+                color={item.color}
+                variant={active ? "outlined" : "contained"}
+                sx={{
+                  ...(active && {
+                    backgroundColor: "white",
+                    color: item.color === "secondary" ? "secondary.main" : "primary.main",
+                    borderColor: "white",
+                    fontWeight: "bold",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    },
+                  }),
+                }}
+              >
+                {item.label}
+              </Button>
+            );
+          })}
         </ButtonGroup>
 
         <LoginButtonWrapper />
