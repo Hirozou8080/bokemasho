@@ -19,8 +19,9 @@ import {
   Chip,
   Autocomplete,
 } from "@mui/material";
-import { Send, ArrowBack } from "@mui/icons-material";
+import { Send } from "@mui/icons-material";
 import Link from "next/link";
+import TopicDetailSkeleton from "@/app/components/molecules/TopicDetailSkeleton";
 
 interface JokeTopic {
   id: number;
@@ -183,23 +184,7 @@ export default function JokeResponsePage() {
   if (loading) {
     return (
       <MainLayout>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            mt: 8,
-          }}
-        >
-          <CircularProgress size={40} />
-          <Typography variant="body1" sx={{ mt: 2 }}>
-            読み込み中...
-          </Typography>
-          <Button startIcon={<ArrowBack />} sx={{ mt: 4 }} disabled>
-            <CircularProgress size={16} sx={{ mr: 1 }} />
-            お題一覧に戻る
-          </Button>
-        </Box>
+        <TopicDetailSkeleton />
       </MainLayout>
     );
   }
