@@ -70,26 +70,20 @@ export default function RegisterPage() {
       return;
     }
 
-    setLoading(true);
-
-    try {
-      await register(username, email, password, passwordConfirmation);
-      handleNext(); // 確認ステップへ
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "登録に失敗しました");
-    } finally {
-      console.log("登録完了");
-      setLoading(false);
-    }
+    // バリデーション成功したら確認画面へ（まだAPIは呼ばない）
+    handleNext();
   };
 
   const handleConfirm = async () => {
     setLoading(true);
+    setError("");
+
     try {
+      // 確認画面で「登録する」を押したときにAPIを呼ぶ
+      await register(username, email, password, passwordConfirmation);
       router.push("/auth/complete?action=registration");
     } catch (err) {
       setError(err instanceof Error ? err.message : "登録処理に失敗しました");
-    } finally {
       setLoading(false);
     }
   };

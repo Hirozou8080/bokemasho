@@ -180,7 +180,7 @@ export const register = async (
   }
 
   const data = await response.json();
-  if (data.token) setToken(data.token);
+  // トークンは保存しない（メール確認後にログインしてもらう）
   return data;
 };
 
