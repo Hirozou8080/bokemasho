@@ -7,6 +7,8 @@
 | [users](./users.md) | ユーザ情報管理テーブル |
 | [joke_topics](./joke_topics.md) | ボケのお題管理テーブル |
 | [jokes](./jokes.md) | ボケ管理テーブル |
+| [categories](./categories.md) | カテゴリ（タグ）管理テーブル |
+| [joke_category](./joke_category.md) | ボケとカテゴリの中間テーブル |
 | [votes](./votes.md) | いいね投票管理テーブル |
 | [personal_access_tokens](./personal_access_tokens.md) | アクセストークン管理テーブル |
 | [password_reset_tokens](./password_reset_tokens.md) | パスワードリセットトークン管理テーブル |
@@ -21,6 +23,8 @@ erDiagram
     users ||--o{ votes : "投票者"
     joke_topics ||--o{ jokes : "お題"
     jokes ||--o{ votes : "投票対象ボケ"
+    jokes ||--o{ joke_category : "カテゴリ紐付け"
+    categories ||--o{ joke_category : "カテゴリ"
 
     users {
         bigint id PK "ユーザーID"
@@ -67,5 +71,19 @@ erDiagram
         bigint joke_id FK "ボケID"
         timestamp created_at "作成日時"
         timestamp updated_at "更新日時"
+    }
+
+    categories {
+        bigint id PK "カテゴリID"
+        varchar name "カテゴリ名"
+        timestamp created_at "作成日時"
+        timestamp updated_at "更新日時"
+    }
+
+    joke_category {
+        bigint id PK "ID"
+        bigint joke_id FK "ボケID"
+        bigint category_id FK "カテゴリID"
+        timestamp created_at "作成日時"
     }
 ```

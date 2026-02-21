@@ -8,11 +8,13 @@ import Button from "@/app/components/atoms/Button";
 import { Menu, MenuItem, Avatar } from "@mui/material";
 import { PersonOutline, ExitToApp } from "@mui/icons-material";
 
+const DEFAULT_ICON = "/images/robot-logo.png";
+
 interface User {
   uid: number;
   username: string;
   nickname?: string;
-  avatar?: string;
+  icon_url?: string;
 }
 
 export default function LoginButton() {
@@ -86,11 +88,10 @@ export default function LoginButton() {
         variant="text"
         onClick={handleClick}
         startIcon={
-          user.avatar ? (
-            <Avatar src={user.avatar} sx={{ width: 28, height: 28 }} />
-          ) : (
-            <PersonOutline sx={{ color: "white" }} />
-          )
+          <Avatar
+            src={user.icon_url || DEFAULT_ICON}
+            sx={{ width: 28, height: 28 }}
+          />
         }
         sx={{ color: "white" }}
       >

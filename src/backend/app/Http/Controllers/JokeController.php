@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\{
+    Category,
     Joke,
     JokeTopic,
     Vote
@@ -24,7 +25,9 @@ class JokeController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'topic_id' => 'required|exists:joke_topics,id',
-            'content' => 'required|string|max:1000',
+            'content' => 'required|string|max:60',
+            'categories' => 'nullable|array|max:3',
+            'categories.*' => 'string|max:6',
         ]);
 
         if ($validator->fails()) {
@@ -48,9 +51,19 @@ class JokeController extends Controller
             $joke->priority = 0;
             $joke->save();
 
+            // カテゴリを紐付け
+            if ($request->has('categories') && is_array($request->categories)) {
+                $categoryIds = [];
+                foreach ($request->categories as $categoryName) {
+                    $category = Category::firstOrCreate(['name' => trim($categoryName)]);
+                    $categoryIds[] = $category->id;
+                }
+                $joke->categories()->sync($categoryIds);
+            }
+
             return response()->json([
                 'message' => 'ボケを投稿しました',
-                'data' => $joke->load('user')
+                'data' => $joke->load('user', 'categories')
             ], 201);
         } catch (\Exception $e) {
             Log::error('ボケ投稿エラー: ' . $e->getMessage());
@@ -65,7 +78,7 @@ class JokeController extends Controller
     {
         try {
             $user_id = $request->query('user_id');
-            $jokes = Joke::with('user', 'topic')
+            $jokes = Joke::with('user', 'topic', 'categories')
                 ->withCount('votes')
                 ->orderBy('priority', 'desc')
                 ->orderBy('created_at', 'desc')
@@ -98,7 +111,7 @@ class JokeController extends Controller
     public function getByTopic($topicId)
     {
         try {
-            $jokes = Joke::with('user')
+            $jokes = Joke::with('user', 'categories')
                 ->where('topic_id', $topicId)
                 ->orderBy('priority', 'desc')
                 ->orderBy('created_at', 'desc')
@@ -119,7 +132,7 @@ class JokeController extends Controller
     public function show($id)
     {
         try {
-            $joke = Joke::with('user', 'topic')->findOrFail($id);
+            $joke = Joke::with('user', 'topic', 'categories')->findOrFail($id);
 
             return response()->json([
                 'data' => $joke

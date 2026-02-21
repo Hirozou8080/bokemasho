@@ -16,6 +16,7 @@ import {
   CardMedia,
   CardContent,
   Divider,
+  Chip,
 } from "@mui/material";
 import { Send, ArrowBack } from "@mui/icons-material";
 import Link from "next/link";
@@ -40,6 +41,9 @@ export default function JokeResponsePage() {
 
   const [topic, setTopic] = useState<JokeTopic | null>(null);
   const [jokeText, setJokeText] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
+  const [categoryInput, setCategoryInput] = useState("");
   const [dataLoading, setDataLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -97,6 +101,33 @@ export default function JokeResponsePage() {
     fetchTopic();
   }, [topicId]);
 
+  // カテゴリのサジェスト取得
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const API_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
+        const searchParam = categoryInput ? `?search=${encodeURIComponent(categoryInput)}` : "";
+        const response = await fetch(`${API_URL}/categories${searchParam}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCategoryOptions(data.data.map((cat: { name: string }) => cat.name));
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchCategories, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [categoryInput]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -123,6 +154,7 @@ export default function JokeResponsePage() {
         body: JSON.stringify({
           topic_id: topicId,
           content: jokeText,
+          categories: categories,
         }),
       });
 
@@ -133,6 +165,7 @@ export default function JokeResponsePage() {
 
       setSuccess(true);
       setJokeText("");
+      setCategories([]);
 
       // 成功後1.5秒後にボケ一覧ページに遷移
       setTimeout(() => {
@@ -321,14 +354,110 @@ export default function JokeResponsePage() {
             <TextField
               label="あなたのボケ"
               value={jokeText}
-              onChange={(e) => setJokeText(e.target.value)}
+              onChange={(e) => setJokeText(e.target.value.replace(/\n/g, '').slice(0, 60))}
               margin="normal"
               required
               fullWidth
-              multiline
-              rows={4}
               placeholder="この画像に対するボケを入力してください"
+              inputProps={{ maxLength: 60 }}
+              helperText={`${jokeText.length}/60文字`}
             />
+
+            {/* 選択済みタグ表示 */}
+            <Box sx={{ mt: 2, mb: 1 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                カテゴリ（タグ）- 最大3つ
+              </Typography>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, minHeight: 32 }}>
+                {categories.map((tag) => (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    onDelete={() => setCategories(categories.filter((t) => t !== tag))}
+                    size="medium"
+                    color="primary"
+                  />
+                ))}
+                {categories.length === 0 && (
+                  <Typography variant="body2" color="text.disabled">
+                    タグが未設定です
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+
+            {/* タグ入力フィールド */}
+            {categories.length < 3 && (
+              <TextField
+                label="タグを入力"
+                value={categoryInput}
+                onChange={(e) => setCategoryInput(e.target.value.slice(0, 6))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                  }
+                }}
+                margin="normal"
+                fullWidth
+                placeholder="タグを入力してください"
+                helperText={`${categoryInput.length}/6文字 - 入力後、下のボタンをタップで追加`}
+                inputProps={{ maxLength: 6 }}
+                size="medium"
+              />
+            )}
+
+            {/* 入力中のタグをタップで追加（スマホ向け） */}
+            {categoryInput.trim() && categories.length < 3 && (
+              <Box sx={{ mt: 1 }}>
+                <Chip
+                  label={`「${categoryInput.trim()}」を追加`}
+                  onClick={() => {
+                    const newTag = categoryInput.trim();
+                    if (newTag && !categories.includes(newTag)) {
+                      setCategories([...categories, newTag]);
+                      setCategoryInput("");
+                    }
+                  }}
+                  color="secondary"
+                  variant="outlined"
+                  sx={{
+                    cursor: "pointer",
+                    fontSize: "1rem",
+                    py: 2,
+                    "& .MuiChip-label": { px: 2 }
+                  }}
+                />
+              </Box>
+            )}
+
+            {/* サジェスト候補 */}
+            {categories.length < 3 && categoryOptions.length > 0 && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="caption" color="text.secondary">
+                  おすすめタグ:
+                </Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 0.5 }}>
+                  {categoryOptions
+                    .filter((opt) => !categories.includes(opt))
+                    .slice(0, 6)
+                    .map((option) => (
+                      <Chip
+                        key={option}
+                        label={option}
+                        onClick={() => {
+                          if (categories.length < 3) {
+                            setCategories([...categories, option]);
+                            setCategoryInput("");
+                          }
+                        }}
+                        variant="outlined"
+                        size="medium"
+                        sx={{ cursor: "pointer" }}
+                      />
+                    ))}
+                </Box>
+              </Box>
+            )}
 
             <Box
               sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}

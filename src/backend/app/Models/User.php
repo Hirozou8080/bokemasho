@@ -22,7 +22,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'bio',
-        'avatar',
+        'icon_path',
     ];
 
     /**
@@ -46,11 +46,25 @@ class User extends Authenticatable implements MustVerifyEmail
         'email' => 'encrypted',
     ];
 
+    protected $appends = ['icon_url'];
+
     /**
      * ユーザーが投稿したボケお題
      */
     public function jokeTopics()
     {
         return $this->hasMany(JokeTopic::class);
+    }
+
+    /**
+     * アイコンのフルURLを取得
+     * icon_pathが設定されていない場合はnullを返す（フロントエンドでデフォルト画像を設定）
+     */
+    public function getIconUrlAttribute(): ?string
+    {
+        if ($this->icon_path) {
+            return asset('storage/' . $this->icon_path);
+        }
+        return null;
     }
 }
