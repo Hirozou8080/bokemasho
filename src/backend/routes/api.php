@@ -24,6 +24,12 @@ Route::post('/logout', 'App\Http\Controllers\Auth\AuthController@logout');
 Route::post('/forgot-password', 'App\Http\Controllers\Auth\PasswordResetController@forgotPassword');
 Route::post('/reset-password', 'App\Http\Controllers\Auth\PasswordResetController@resetPassword');
 
+// メール確認関連のルーティング
+Route::get('/email/verify/{id}/{hash}', 'App\Http\Controllers\Auth\EmailVerificationController@verify')
+    ->name('verification.verify');
+Route::post('/email/resend', 'App\Http\Controllers\Auth\EmailVerificationController@resend')
+    ->name('verification.resend');
+
 // プロフィール関連のルーティング
 Route::middleware('auth:sanctum')->group(function () {
   Route::get('/profile', 'App\Http\Controllers\ProfileController@show');

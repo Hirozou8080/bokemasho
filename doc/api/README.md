@@ -25,7 +25,7 @@ POST /api/register
 **リクエスト:**
 ```json
 {
-  "name": "ユーザー名",
+  "username": "ユーザー名",
   "email": "user@example.com",
   "password": "password123",
   "password_confirmation": "password123"
@@ -35,14 +35,15 @@ POST /api/register
 **レスポンス:**
 ```json
 {
+  "message": "登録が完了しました。メールアドレスに送信された確認リンクをクリックしてください。",
   "user": {
     "id": 1,
-    "name": "ユーザー名",
-    "email": "user@example.com"
-  },
-  "token": "access_token_here"
+    "username": "ユーザー名"
+  }
 }
 ```
+
+**備考:** 登録後はメール確認が必要です。トークンは発行されません。
 
 #### ログイン
 ```
@@ -57,17 +58,27 @@ POST /api/login
 }
 ```
 
-**レスポンス:**
+**レスポンス（成功時）:**
 ```json
 {
+  "token": "access_token_here",
   "user": {
     "id": 1,
-    "name": "ユーザー名",
+    "username": "ユーザー名",
     "email": "user@example.com"
-  },
-  "token": "access_token_here"
+  }
 }
 ```
+
+**レスポンス（メール未確認時 - 403）:**
+```json
+{
+  "message": "メールアドレスが確認されていません。メールに送信された確認リンクをクリックしてください。",
+  "email_verified": false
+}
+```
+
+**備考:** メールアドレスが確認されていないユーザーはログインできません。
 
 #### ログアウト
 ```
@@ -96,6 +107,35 @@ GET /api/user
   "email": "user@example.com",
   "profile_image": "path/to/image.jpg",
   "created_at": "2024-01-01T00:00:00.000000Z"
+}
+```
+
+### メール確認
+
+#### メール確認
+```
+GET /api/email/verify/{id}/{hash}
+```
+**認証:** 不要
+
+メール内の確認リンクからアクセスされます。確認完了後、フロントエンドの完了画面にリダイレクトします。
+
+#### 確認メール再送信
+```
+POST /api/email/resend
+```
+
+**リクエスト:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**レスポンス:**
+```json
+{
+  "message": "確認メールを再送信しました。"
 }
 ```
 
@@ -440,6 +480,8 @@ POST /api/jokes/{id}/vote
 | POST /api/login | /auth/login |
 | POST /api/logout | Header (LoginButtonWrapper) |
 | GET /api/user | /profile, /profile/edit, Header |
+| GET /api/email/verify/{id}/{hash} | メールリンク → /auth/complete |
+| POST /api/email/resend | /auth/login (メール未確認時) |
 | POST /api/forgot-password | /auth/forgot-password |
 | POST /api/reset-password | /auth/reset-password |
 | GET /api/profile | /profile |
