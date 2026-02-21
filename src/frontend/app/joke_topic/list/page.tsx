@@ -1,19 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import MainLayout from "@/app/components/templates/MainLayout";
-import {
-  Box,
-  Paper,
-  Button,
-  CircularProgress,
-  Typography,
-  Stack,
-} from "@mui/material";
-import { CloudUpload, ArrowBack } from "@mui/icons-material";
-import Link from "next/link";
+import { Box, Typography } from "@mui/material";
 import TopicCard from "@/app/components/molecules/TopicCard";
+import TopicCardSkeleton from "@/app/components/molecules/TopicCardSkeleton";
+import CardGrid from "@/app/components/organisms/CardGrid";
 
 interface JokeTopic {
   id: number;
@@ -29,7 +21,6 @@ interface JokeTopic {
 }
 
 export default function JokeTopicListPage() {
-  const router = useRouter();
   const [topics, setTopics] = useState<JokeTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -70,42 +61,6 @@ export default function JokeTopicListPage() {
     fetchTopics();
   }, []);
 
-  if (loading) {
-    return (
-      <MainLayout>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            mt: 8,
-          }}
-        >
-          <CircularProgress size={40} />
-          <Typography variant="body1" sx={{ mt: 2 }}>
-            お題を読み込み中...
-          </Typography>
-          <Button
-            component={Link}
-            href="/"
-            startIcon={<ArrowBack />}
-            sx={{ mt: 4 }}
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <CircularProgress size={16} sx={{ mr: 1 }} />
-                戻る
-              </>
-            ) : (
-              "ホームに戻る"
-            )}
-          </Button>
-        </Box>
-      </MainLayout>
-    );
-  }
-
   return (
     <MainLayout>
       <Box sx={{ mb: 4 }}>
@@ -120,50 +75,16 @@ export default function JokeTopicListPage() {
           </Typography>
         </Box>
 
-        {error && (
-          <Typography color="error" sx={{ mb: 2 }}>
-            {error}
-          </Typography>
-        )}
-
-        {topics.length === 0 && !error ? (
-          <Paper sx={{ p: 3, textAlign: "center" }}>
-            <Typography variant="h6" gutterBottom>
-              まだボケお題がありません
-            </Typography>
-            <Typography variant="body1" paragraph>
-              最初のボケお題を投稿してみませんか？
-            </Typography>
-            <Button
-              component={Link}
-              href="/joke_topic/create"
-              variant="contained"
-              color="primary"
-              startIcon={<CloudUpload />}
-            >
-              お題を投稿
-            </Button>
-          </Paper>
-        ) : (
-          <Box sx={{ width: "100%" }}>
-            <Stack spacing={3} direction="row" useFlexGap flexWrap="wrap">
-              {Array.isArray(topics) && topics.length > 0 ? (
-                topics.map((topic) => (
-                  <Box
-                    key={topic.id}
-                    sx={{ width: { xs: "100%", sm: "45%", md: "30%" }, mb: 3 }}
-                  >
-                    <TopicCard topic={topic} />
-                  </Box>
-                ))
-              ) : (
-                <Box sx={{ width: "100%", textAlign: "center" }}>
-                  <Typography align="center">お題がありません</Typography>
-                </Box>
-              )}
-            </Stack>
-          </Box>
-        )}
+        <CardGrid
+          items={topics}
+          loading={loading}
+          error={error}
+          emptyMessage="まだボケお題がありません"
+          skeletonCount={6}
+          renderItem={(topic) => <TopicCard topic={topic} />}
+          renderSkeleton={() => <TopicCardSkeleton />}
+          columns={{ xs: "100%", sm: "45%", md: "30%" }}
+        />
       </Box>
     </MainLayout>
   );

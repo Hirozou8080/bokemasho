@@ -6,9 +6,6 @@ import Typography from "../components/atoms/Typography";
 import {
   Box,
   Button,
-  CircularProgress,
-  Stack,
-  Paper,
   Pagination,
   Fab,
   Tabs,
@@ -17,12 +14,10 @@ import {
 import { ArrowBack, EmojiEmotions, TrendingUp, Schedule, EmojiEvents } from "@mui/icons-material";
 import Link from "next/link";
 import { getToken, getUserData } from "@/app/lib/auth";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import { useRouter } from "next/navigation";
 import JokeCard from "../components/molecules/JokeCard";
+import JokeCardSkeleton from "../components/molecules/JokeCardSkeleton";
+import LoginRequiredDialog from "../components/molecules/LoginRequiredDialog";
+import CardGrid from "../components/organisms/CardGrid";
 
 interface Category {
   id: number;
@@ -63,7 +58,6 @@ export default function JokesPage() {
   const [userInitialized, setUserInitialized] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [sortType, setSortType] = useState<SortType>("latest");
-  const router = useRouter();
 
   // クライアントサイドでユーザー情報を取得
   useEffect(() => {
@@ -239,45 +233,32 @@ export default function JokesPage() {
           </Tabs>
         </Box>
 
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 8, mb: 8 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Paper sx={{ p: 3, textAlign: "center", mb: 3 }}>
-            <Typography color="error">{error}</Typography>
-          </Paper>
-        ) : jokes.length === 0 ? (
-          <Paper sx={{ p: 3, textAlign: "center", mb: 3 }}>
-            <Typography>まだボケがありません</Typography>
-          </Paper>
-        ) : (
-          <>
-            <Stack direction="row" spacing={3} useFlexGap flexWrap="wrap">
-              {jokes.map((joke) => (
-                <Box
-                  key={joke.id}
-                  sx={{ width: { xs: "100%", sm: "48%", md: "31%" }, mb: 3 }}
-                >
-                  <JokeCard joke={joke} onVote={handleVote} actionLabel="このお題でボケる" />
-                </Box>
-              ))}
-            </Stack>
+        <CardGrid
+          items={jokes}
+          loading={loading}
+          error={error}
+          emptyMessage="まだボケがありません"
+          skeletonCount={6}
+          renderItem={(joke) => (
+            <JokeCard joke={joke} onVote={handleVote} actionLabel="このお題でボケる" />
+          )}
+          renderSkeleton={() => <JokeCardSkeleton />}
+        />
 
-            <Box
-              sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}
-            >
-              <Pagination
-                count={totalPages}
-                page={page}
-                onChange={handlePageChange}
-                color="primary"
-                size="large"
-                showFirstButton
-                showLastButton
-              />
-            </Box>
-          </>
+        {!loading && !error && jokes.length > 0 && (
+          <Box
+            sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}
+          >
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+              showFirstButton
+              showLastButton
+            />
+          </Box>
         )}
       </Box>
 
@@ -301,23 +282,11 @@ export default function JokesPage() {
         ボケる
       </Fab>
 
-      <Dialog open={openModal} onClose={() => setOpenModal(false)}>
-        <DialogTitle>ログインが必要です</DialogTitle>
-        <DialogContent>グッドを押すにはログインをしてください。</DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenModal(false)}>閉じる</Button>
-          <Button
-            onClick={() => {
-              setOpenModal(false);
-              router.push("/auth/login");
-            }}
-            color="primary"
-            variant="contained"
-          >
-            ログインページへ
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <LoginRequiredDialog
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        message="グッドを押すにはログインをしてください。"
+      />
     </MainLayout>
   );
 }
