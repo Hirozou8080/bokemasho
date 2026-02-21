@@ -21,14 +21,27 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (! Auth::attempt($request->only('email', 'password'))) {
+        // emailが暗号化されているため、全ユーザーを取得して復号後に比較
+        $user = User::all()->first(function ($user) use ($request) {
+            return $user->email === $request->email;
+        });
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['認証情報が記録と一致しません。'],
             ]);
         }
 
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
+        Auth::login($user);
+
+        // メールアドレスが確認されているかチェック
+        if (!$user->hasVerifiedEmail()) {
+            Auth::logout();
+            return response()->json([
+                'message' => 'メールアドレスが確認されていません。メールに送信された確認リンクをクリックしてください。',
+                'email_verified' => false,
+            ], 403);
+        }
 
         // 既存トークンを削除（多重ログインを許可しない場合）
         $user->tokens()->delete();
@@ -77,12 +90,16 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        // 登録直後にトークンを発行
-        $token = $user->createToken("register:user{$user->id}")->plainTextToken;
+        // メール確認用の通知を送信
+        $user->sendEmailVerificationNotification();
 
+        // トークンは発行しない（メール確認後にログインしてもらう）
         return response()->json([
-            'token' => $token,
-            'user'  => $user,
+            'message' => '登録が完了しました。メールアドレスに送信された確認リンクをクリックしてください。',
+            'user' => [
+                'id' => $user->id,
+                'username' => $user->username,
+            ],
         ], 201);
     }
 }
