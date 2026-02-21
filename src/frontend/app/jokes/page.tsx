@@ -27,6 +27,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import { useRouter } from "next/navigation";
 
+const DEFAULT_ICON = "/images/robot-logo.png";
+
 interface Joke {
   id: number;
   content: string;
@@ -36,7 +38,7 @@ interface Joke {
   created_at: string;
   user: {
     username: string;
-    avatar?: string;
+    icon_url?: string;
   };
   topic: {
     id: number;
@@ -254,7 +256,7 @@ export default function JokesPage() {
                         sx={{ display: "flex", alignItems: "center", mb: 2 }}
                       >
                         <Avatar
-                          src={joke.user.avatar}
+                          src={joke.user.icon_url || DEFAULT_ICON}
                           alt={joke.user.username}
                           sx={{ mr: 1, width: 32, height: 32 }}
                         />

@@ -26,6 +26,8 @@ import {
 import { EmojiEmotions, ArrowForward, ThumbUp } from "@mui/icons-material";
 import Link from "next/link";
 
+const DEFAULT_ICON = "/images/robot-logo.png";
+
 interface Joke {
   id: number;
   content: string;
@@ -34,7 +36,7 @@ interface Joke {
   has_voted: boolean;
   user: {
     username: string;
-    avatar?: string;
+    icon_url?: string;
   };
   topic: {
     id: number;
@@ -51,7 +53,7 @@ interface JokeTopic {
   updated_at: string;
   user: {
     username: string;
-    avatar?: string;
+    icon_url?: string;
   };
 }
 
@@ -327,7 +329,7 @@ export default function Home() {
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                       <Avatar
-                        src={joke.user.avatar}
+                        src={joke.user.icon_url || DEFAULT_ICON}
                         alt={joke.user.username}
                         sx={{ mr: 1, width: 32, height: 32 }}
                       />

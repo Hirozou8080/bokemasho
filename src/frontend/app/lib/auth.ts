@@ -184,15 +184,32 @@ export const register = async (
   return data;
 };
 
-// プロフィール更新
+// プロフィール更新（アイコン画像を含む場合はFormDataを使用）
 export const updateProfile = async (userData: {
   username?: string;
   bio?: string;
+  icon?: File;
 }): Promise<any> => {
+  const formData = new FormData();
+
+  if (userData.username !== undefined) {
+    formData.append("username", userData.username);
+  }
+  if (userData.bio !== undefined) {
+    formData.append("bio", userData.bio);
+  }
+  if (userData.icon) {
+    formData.append("icon", userData.icon);
+  }
+
+  const token = getToken();
   const response = await fetch(`${API_URL}/profile`, {
     method: "POST",
-    headers: jsonHeaders(),
-    body: JSON.stringify(userData),
+    headers: {
+      Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
   });
 
   if (!response.ok) {
