@@ -47,6 +47,9 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::delete('/joke-topics/{id}', 'App\Http\Controllers\JokeTopicController@destroy');
 });
 
+// カテゴリ関連のルーティング
+Route::get('/categories', 'App\Http\Controllers\CategoryController@index');
+
 // ボケ関連のルーティング
 Route::get('/jokes', 'App\Http\Controllers\JokeController@index');
 Route::get('/jokes/{id}', 'App\Http\Controllers\JokeController@show');

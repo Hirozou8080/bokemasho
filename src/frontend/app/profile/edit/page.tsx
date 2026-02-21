@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getUser, updateProfile } from "@/app/lib/auth";
 import MainLayout from "@/app/components/templates/MainLayout";
@@ -12,15 +12,19 @@ import {
   Button,
   TextField,
   Alert,
+  IconButton,
 } from "@mui/material";
+import { PhotoCamera } from "@mui/icons-material";
 import Typography from "@/app/components/atoms/Typography";
 import TextInput from "@/app/components/atoms/TextField";
+
+const DEFAULT_ICON = "/images/robot-logo.png";
 
 interface User {
   uid?: number;
   username: string;
   email: string;
-  avatar?: string;
+  icon_url?: string;
   bio?: string;
 }
 
@@ -29,10 +33,13 @@ export default function EditProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
+  const [iconFile, setIconFile] = useState<File | null>(null);
+  const [iconPreview, setIconPreview] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -42,6 +49,7 @@ export default function EditProfilePage() {
           setUser(response.user);
           setUsername(response.user.username || "");
           setBio(response.user.bio || "");
+          setIconPreview(response.user.icon_url || DEFAULT_ICON);
         } else {
           // ユーザーデータがない場合はログインページにリダイレクト
           router.push("/auth/login");
@@ -57,6 +65,22 @@ export default function EditProfilePage() {
     fetchUserData();
   }, [router]);
 
+  const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIconFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setIconPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleIconClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -64,10 +88,14 @@ export default function EditProfilePage() {
     setSuccess(false);
 
     try {
-      const updatedData = {
+      const updatedData: { username: string; bio: string; icon?: File } = {
         username,
         bio,
       };
+
+      if (iconFile) {
+        updatedData.icon = iconFile;
+      }
 
       const result = await updateProfile(updatedData);
       console.log(result);
@@ -150,11 +178,40 @@ export default function EditProfilePage() {
               mb: 4,
             }}
           >
-            <Avatar
-              src={user.avatar || "/images/robot-logo.png"}
-              alt={user.username}
-              sx={{ width: 120, height: 120, mb: 2 }}
-            />
+            <Box sx={{ position: "relative" }}>
+              <Avatar
+                src={iconPreview || DEFAULT_ICON}
+                alt={user.username}
+                sx={{ width: 120, height: 120, mb: 2, cursor: "pointer" }}
+                onClick={handleIconClick}
+              />
+              <IconButton
+                sx={{
+                  position: "absolute",
+                  bottom: 8,
+                  right: -8,
+                  backgroundColor: "primary.main",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "primary.dark",
+                  },
+                }}
+                onClick={handleIconClick}
+                size="small"
+              >
+                <PhotoCamera fontSize="small" />
+              </IconButton>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleIconChange}
+                accept="image/jpeg,image/png,image/jpg,image/gif"
+                style={{ display: "none" }}
+              />
+            </Box>
+            <Typography variant="caption" color="text.secondary">
+              クリックしてアイコンを変更
+            </Typography>
           </Box>
 
           <Box component="form" onSubmit={handleSubmit}>

@@ -103,12 +103,15 @@ GET /api/user
 ```json
 {
   "id": 1,
-  "name": "ユーザー名",
+  "username": "ユーザー名",
   "email": "user@example.com",
-  "profile_image": "path/to/image.jpg",
+  "bio": "自己紹介文",
+  "icon_url": "http://localhost:8080/storage/icons/xxx.jpg",
   "created_at": "2024-01-01T00:00:00.000000Z"
 }
 ```
+
+**備考:** `icon_url`は自動生成される属性で、アイコンが未設定の場合はnullを返します。
 
 ### メール確認
 
@@ -194,9 +197,10 @@ GET /api/profile
 ```json
 {
   "id": 1,
-  "name": "ユーザー名",
+  "username": "ユーザー名",
   "email": "user@example.com",
-  "profile_image": "path/to/image.jpg"
+  "bio": "自己紹介文",
+  "icon_url": "http://localhost:8080/storage/icons/xxx.jpg"
 }
 ```
 
@@ -208,19 +212,23 @@ POST /api/profile
 
 **リクエスト (multipart/form-data):**
 ```
-name: 新しいユーザー名
-profile_image: (ファイル)
+username: 新しいユーザー名
+bio: 自己紹介文
+icon: (画像ファイル - jpeg,png,jpg,gif, 最大2MB)
 ```
 
 **レスポンス:**
 ```json
 {
   "id": 1,
-  "name": "新しいユーザー名",
+  "username": "新しいユーザー名",
   "email": "user@example.com",
-  "profile_image": "path/to/new_image.jpg"
+  "bio": "自己紹介文",
+  "icon_url": "http://localhost:8080/storage/icons/xxx.jpg"
 }
 ```
+
+**備考:** アイコンが未設定の場合、`icon_url`はnullを返します。フロントエンドでデフォルトアイコン(`/images/robot-logo.png`)を設定してください。
 
 ### ボケお題 (Joke Topics)
 
@@ -337,6 +345,29 @@ DELETE /api/joke-topics/{id}
 ```
 **認証:** 必要（投稿者のみ）
 
+### カテゴリ (Categories)
+
+#### カテゴリ一覧取得（サジェスト用）
+```
+GET /api/categories
+```
+**認証:** 不要
+
+**クエリパラメータ:**
+| パラメータ | 型 | 説明 |
+|-----------|-----|------|
+| search | string | 検索キーワード（部分一致） |
+
+**レスポンス:**
+```json
+{
+  "data": [
+    { "id": 1, "name": "シュール" },
+    { "id": 2, "name": "下ネタ" }
+  ]
+}
+```
+
 ### ボケ (Jokes)
 
 #### ボケ一覧取得
@@ -368,6 +399,9 @@ GET /api/jokes
         "id": 1,
         "title": "お題タイトル"
       },
+      "categories": [
+        { "id": 1, "name": "シュール" }
+      ],
       "votes_count": 5,
       "created_at": "2024-01-01T00:00:00.000000Z"
     }
@@ -403,9 +437,14 @@ POST /api/jokes/create
 ```json
 {
   "content": "ボケの内容",
-  "joke_topic_id": 1
+  "joke_topic_id": 1,
+  "categories": ["シュール", "天然ボケ"]
 }
 ```
+
+**備考:**
+- `categories`は任意で、最大3つまで指定可能
+- 新しいカテゴリ名を指定すると自動的に作成される
 
 **レスポンス:**
 ```json
@@ -414,6 +453,10 @@ POST /api/jokes/create
   "content": "ボケの内容",
   "joke_topic_id": 1,
   "user_id": 1,
+  "categories": [
+    { "id": 1, "name": "シュール" },
+    { "id": 2, "name": "天然ボケ" }
+  ],
   "created_at": "2024-01-01T00:00:00.000000Z"
 }
 ```
@@ -492,3 +535,4 @@ POST /api/jokes/{id}/vote
 | GET /api/jokes | /, /jokes |
 | POST /api/jokes/create | /joke_topic/[id] |
 | POST /api/jokes/{id}/vote | /, /joke_topic/[id], /jokes |
+| GET /api/categories | /joke_topic/[id] (サジェスト用) |

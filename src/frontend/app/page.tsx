@@ -20,11 +20,16 @@ import {
   CardActions,
   Avatar,
   Paper,
-  Divider,
   CardMedia,
 } from "@mui/material";
-import { EmojiEmotions, ArrowForward, ThumbUp } from "@mui/icons-material";
+import { EmojiEmotions, ArrowForward } from "@mui/icons-material";
 import Link from "next/link";
+import JokeCard from "./components/molecules/JokeCard";
+
+interface Category {
+  id: number;
+  name: string;
+}
 
 interface Joke {
   id: number;
@@ -34,12 +39,13 @@ interface Joke {
   has_voted: boolean;
   user: {
     username: string;
-    avatar?: string;
+    icon_url?: string;
   };
   topic: {
     id: number;
     image_path: string;
   };
+  categories?: Category[];
 }
 
 interface JokeTopic {
@@ -51,7 +57,7 @@ interface JokeTopic {
   updated_at: string;
   user: {
     username: string;
-    avatar?: string;
+    icon_url?: string;
   };
 }
 
@@ -303,90 +309,7 @@ export default function Home() {
                 key={joke.id}
                 sx={{ width: { xs: "100%", sm: "48%", md: "31%" }, mb: 3 }}
               >
-                <Card
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={
-                      joke.topic.image_path
-                        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/storage/${joke.topic.image_path}`
-                        : "https://placehold.co/600x400?text=No+Image"
-                    }
-                    alt="ボケお題画像"
-                    sx={{
-                      height: 200,
-                      objectFit: "contain",
-                      bgcolor: "grey.100",
-                    }}
-                  />
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                      <Avatar
-                        src={joke.user.avatar}
-                        alt={joke.user.username}
-                        sx={{ mr: 1, width: 32, height: 32 }}
-                      />
-                      <Typography variant="subtitle2">
-                        {joke.user.username}
-                      </Typography>
-                    </Box>
-
-                    <Typography variant="body1" sx={{ mb: 2 }}>
-                      {joke.content}
-                    </Typography>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(joke.created_at).toLocaleDateString("ja-JP")}
-                      </Typography>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Button
-                          onClick={() => handleVote(joke.id)}
-                          sx={{
-                            minWidth: "auto",
-                            p: 0.5,
-                            color: joke.has_voted
-                              ? "primary.main"
-                              : "text.secondary",
-                            "&:hover": {
-                              backgroundColor: "transparent",
-                            },
-                          }}
-                        >
-                          <ThumbUp
-                            fontSize="small"
-                            color={joke.has_voted ? "primary" : "inherit"}
-                            sx={{ mr: 0.5 }}
-                          />
-                        </Button>
-                        <Typography variant="body2" color="primary">
-                          {joke.votes_count || 0}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                  <Divider />
-                  <CardActions>
-                    <Button
-                      size="small"
-                      component={Link}
-                      href={`/joke_topic/${joke.topic.id}`}
-                    >
-                      お題を見る
-                    </Button>
-                  </CardActions>
-                </Card>
+                <JokeCard joke={joke} onVote={handleVote} />
               </Box>
             ))}
           </Stack>

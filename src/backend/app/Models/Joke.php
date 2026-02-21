@@ -49,4 +49,12 @@ class Joke extends Model
     {
         return $this->votes()->where('user_id', $user->id)->exists();
     }
+
+    /**
+     * このボケに紐づくカテゴリ
+     */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'joke_category');
+    }
 }

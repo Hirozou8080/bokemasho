@@ -14,11 +14,13 @@ import {
 } from "@mui/material";
 import Typography from "@/app/components/atoms/Typography";
 
+const DEFAULT_ICON = "/images/robot-logo.png";
+
 interface User {
   uid?: number;
   username: string;
   email: string;
-  avatar?: string;
+  icon_url?: string;
   bio?: string;
 }
 
@@ -121,7 +123,7 @@ export default function ProfilePage() {
             }}
           >
             <Avatar
-              src={user.avatar || "/images/robot-logo.png"}
+              src={user.icon_url || DEFAULT_ICON}
               alt={user.username}
               sx={{ width: 120, height: 120, mb: 2 }}
             />

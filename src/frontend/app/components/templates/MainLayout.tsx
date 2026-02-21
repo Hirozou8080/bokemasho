@@ -13,9 +13,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <CssBaseline />
       <Header />
 
-      <Container component="main" sx={{ flex: "1 0 auto", py: 4 }}>
-        {children}
-      </Container>
+      <Box sx={{ flex: "1 0 auto", bgcolor: "#fffef5" }}>
+        <Container component="main" sx={{ py: 4 }}>
+          {children}
+        </Container>
+      </Box>
 
       <Footer />
     </Box>
