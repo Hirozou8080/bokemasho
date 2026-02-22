@@ -21,10 +21,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        // emailが暗号化されているため、全ユーザーを取得して復号後に比較
-        $user = User::all()->first(function ($user) use ($request) {
-            return $user->email === $request->email;
-        });
+        $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
