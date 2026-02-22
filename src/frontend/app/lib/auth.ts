@@ -257,8 +257,16 @@ export const updateProfile = async (userData: {
 
   if (!response.ok) {
     const error = await response.json();
+    console.error("Profile update error:", error);
     throw new Error(error.message || "プロフィールの更新に失敗しました");
   }
 
-  return response.json();
+  const data = await response.json();
+
+  // 更新されたユーザー情報をキャッシュに保存
+  if (data.data) {
+    setUserData(data.data);
+  }
+
+  return data;
 };
