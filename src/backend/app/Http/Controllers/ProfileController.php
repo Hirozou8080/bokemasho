@@ -44,7 +44,7 @@ class ProfileController extends Controller
     $validator = Validator::make($request->all(), [
       'username' => 'sometimes|string|max:255|unique:users,username,' . $user->id,
       'bio' => 'sometimes|nullable|string|max:1000',
-      'icon' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+      'icon' => 'sometimes|nullable|file|mimes:jpeg,png,jpg,gif,webp,heic,heif|max:10240',
     ]);
 
     if ($validator->fails()) {
