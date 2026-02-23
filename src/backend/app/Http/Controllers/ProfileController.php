@@ -69,12 +69,11 @@ class ProfileController extends Controller
     }
 
     // アイコン画像のアップロード処理
+    $oldIconPath = null;
     if ($request->hasFile('icon')) {
       try {
-        // 古いアイコンがあれば削除
-        if ($user->icon_path) {
-          Storage::disk('public')->delete($user->icon_path);
-        }
+        // 古いアイコンパスを保持（後で削除するため）
+        $oldIconPath = $user->icon_path;
 
         // 新しいアイコンを保存
         $iconPath = $request->file('icon')->store('icons', 'public');
@@ -93,6 +92,12 @@ class ProfileController extends Controller
     // ユーザーモデルを保存
     if (!empty($updateData)) {
       User::where('id', $user->id)->update($updateData);
+
+      // DB更新成功後に古いアイコンを削除
+      if ($oldIconPath) {
+        Storage::disk('public')->delete($oldIconPath);
+        Log::info('Old icon deleted', ['path' => $oldIconPath]);
+      }
     }
 
     // 更新後のユーザー情報を取得
