@@ -11,6 +11,8 @@ const API_URL =
 
 const TOKEN_KEY = "access_token";
 const USER_KEY = "user_data";
+const USER_CACHE_TIME_KEY = "user_cache_time";
+const CACHE_DURATION_MS = 5 * 60 * 1000; // 5分
 
 export const getToken = (): string | null => {
   if (typeof window === "undefined") return null;
@@ -28,10 +30,11 @@ export const clearToken = () => {
   localStorage.removeItem(USER_KEY);
 };
 
-// ユーザー情報をlocalStorageに保存
+// ユーザー情報をlocalStorageに保存（キャッシュ時刻も記録）
 export const setUserData = (user: any) => {
   if (typeof window === "undefined") return;
   localStorage.setItem(USER_KEY, JSON.stringify(user));
+  localStorage.setItem(USER_CACHE_TIME_KEY, Date.now().toString());
 };
 
 // ユーザー情報をlocalStorageから取得
@@ -39,6 +42,15 @@ export const getUserData = (): any | null => {
   if (typeof window === "undefined") return null;
   const data = localStorage.getItem(USER_KEY);
   return data ? JSON.parse(data) : null;
+};
+
+// キャッシュが有効かどうかを確認
+const isCacheValid = (): boolean => {
+  if (typeof window === "undefined") return false;
+  const cacheTime = localStorage.getItem(USER_CACHE_TIME_KEY);
+  if (!cacheTime) return false;
+  const elapsed = Date.now() - parseInt(cacheTime, 10);
+  return elapsed < CACHE_DURATION_MS;
 };
 
 // ユーザー情報をクリア
@@ -112,10 +124,10 @@ export const logout = async (): Promise<any> => {
   return response.json();
 };
 
-// ユーザー情報取得（キャッシュ優先）
+// ユーザー情報取得（キャッシュ優先、5分で期限切れ）
 export const getUser = async (forceRefresh = false): Promise<any> => {
-  // キャッシュがあり、強制リフレッシュでなければキャッシュを返す
-  if (!forceRefresh) {
+  // キャッシュがあり、有効期限内で、強制リフレッシュでなければキャッシュを返す
+  if (!forceRefresh && isCacheValid()) {
     const cachedUser = getUserData();
     if (cachedUser) {
       return { user: cachedUser };
