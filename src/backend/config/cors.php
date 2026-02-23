@@ -19,7 +19,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => [
+        'http://localhost:3000',
+        'https://bokemasho.vercel.app',
+        'https://bokemasho.hirokilab.com',
+    ],
 
     'allowed_origins_patterns' => [],
 
@@ -29,6 +33,5 @@ return [
 
     'max_age' => 0,
 
-    // 'supports_credentials' => false,
-    'supports_credentials' => true,
+    'supports_credentials' => false,
 ];

@@ -45,6 +45,9 @@ class ProfileController extends Controller
       'username' => 'sometimes|string|max:255|unique:users,username,' . $user->id,
       'bio' => 'sometimes|nullable|string|max:1000',
       'icon' => 'sometimes|nullable|file|mimes:jpeg,png,jpg,gif,webp,heic,heif|max:10240',
+    ], [
+      'icon.mimes' => '対応形式: JPEG, PNG, GIF, WebP, HEIC',
+      'icon.max' => 'ファイルサイズは10MB以下にしてください',
     ]);
 
     if ($validator->fails()) {

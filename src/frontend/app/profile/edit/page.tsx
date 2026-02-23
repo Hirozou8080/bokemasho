@@ -157,6 +157,10 @@ export default function EditProfilePage() {
           プロフィール編集
         </Typography>
 
+        <Alert severity="info" sx={{ width: "100%", maxWidth: 600, mt: 2 }}>
+          プロフィールの変更は、他のデバイスに反映されるまで最大5分かかる場合があります。
+        </Alert>
+
         <Paper elevation={3} sx={{ width: "100%", maxWidth: 600, p: 4, mt: 2 }}>
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
@@ -205,7 +209,7 @@ export default function EditProfilePage() {
                 type="file"
                 ref={fileInputRef}
                 onChange={handleIconChange}
-                accept="image/jpeg,image/png,image/jpg,image/gif"
+                accept="image/jpeg,image/png,image/jpg,image/gif,image/webp,image/heic,image/heif"
                 style={{ display: "none" }}
               />
             </Box>
