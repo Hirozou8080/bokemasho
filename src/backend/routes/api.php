@@ -14,11 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 // ログインと新規登録のルーティング
-Route::post('/register', 'App\Http\Controllers\Auth\AuthController@register');
-Route::post('/login', 'App\Http\Controllers\Auth\AuthController@login');
+Route::post('/register', 'App\Http\Controllers\Api\Auth\AuthController@register');
+Route::post('/login', 'App\Http\Controllers\Api\Auth\AuthController@login');
 
-Route::middleware('auth:sanctum')->get('/user', 'App\Http\Controllers\Auth\AuthController@user');
-Route::post('/logout', 'App\Http\Controllers\Auth\AuthController@logout');
+Route::middleware('auth:sanctum')->get('/user', 'App\Http\Controllers\Api\Auth\AuthController@user');
+Route::post('/logout', 'App\Http\Controllers\Api\Auth\AuthController@logout');
 
 // パスワードリセット関連のルーティング
 Route::post('/forgot-password', 'App\Http\Controllers\Auth\PasswordResetController@forgotPassword');
@@ -32,8 +32,8 @@ Route::post('/email/resend', 'App\Http\Controllers\Auth\EmailVerificationControl
 
 // プロフィール関連のルーティング
 Route::middleware('auth:sanctum')->group(function () {
-  Route::get('/profile', 'App\Http\Controllers\ProfileController@show');
-  Route::post('/profile', 'App\Http\Controllers\ProfileController@update');
+  Route::get('/profile', 'App\Http\Controllers\Api\ProfileController@show');
+  Route::post('/profile', 'App\Http\Controllers\Api\ProfileController@update');
 });
 
 // ボケお題関連のルーティング
