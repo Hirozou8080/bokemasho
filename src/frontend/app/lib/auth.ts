@@ -153,7 +153,12 @@ export const getUser = async (forceRefresh = false): Promise<any> => {
   }
 
   const data = await response.json();
-  // レスポンスをキャッシュに保存
+  // レスポンスをキャッシュに保存（user オブジェクトのみ）
+  if (data.user) {
+    setUserData(data.user);
+    return { user: data.user };
+  }
+  // フォールバック: dataがそのままuserの場合
   setUserData(data);
   return { user: data };
 };
