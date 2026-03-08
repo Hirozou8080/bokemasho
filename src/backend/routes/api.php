@@ -37,27 +37,27 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // ボケお題関連のルーティング
-Route::get('/joke-topics', 'App\Http\Controllers\JokeTopicController@index');
-Route::get('/joke-topics/{id}', 'App\Http\Controllers\JokeTopicController@show');
+Route::get('/joke-topics', 'App\Http\Controllers\Api\JokeTopicController@index');
+Route::get('/joke-topics/{id}', 'App\Http\Controllers\Api\JokeTopicController@show');
 
 // 認証が必要なボケお題ルート
 Route::middleware('auth:sanctum')->group(function () {
-  Route::post('/joke-topics', 'App\Http\Controllers\JokeTopicController@store');
-  Route::put('/joke-topics/{id}', 'App\Http\Controllers\JokeTopicController@update');
-  Route::delete('/joke-topics/{id}', 'App\Http\Controllers\JokeTopicController@destroy');
+  Route::post('/joke-topics', 'App\Http\Controllers\Api\JokeTopicController@store');
+  Route::put('/joke-topics/{id}', 'App\Http\Controllers\Api\JokeTopicController@update');
+  Route::delete('/joke-topics/{id}', 'App\Http\Controllers\Api\JokeTopicController@destroy');
 });
 
 // カテゴリ関連のルーティング
 Route::get('/categories', 'App\Http\Controllers\CategoryController@index');
 
 // ボケ関連のルーティング
-Route::get('/jokes', 'App\Http\Controllers\JokeController@index');
-Route::get('/jokes/{id}', 'App\Http\Controllers\JokeController@show');
-Route::get('/topics/{topicId}/jokes', 'App\Http\Controllers\JokeController@getByTopic');
+Route::get('/jokes', 'App\Http\Controllers\Api\JokeController@index');
+Route::get('/jokes/{id}', 'App\Http\Controllers\Api\JokeController@show');
+Route::get('/topics/{topicId}/jokes', 'App\Http\Controllers\Api\JokeController@getByTopic');
 
 // 認証が必要なボケ関連ルート
 Route::middleware('auth:sanctum')->group(function () {
-  Route::post('/jokes/create', 'App\Http\Controllers\JokeController@create');
-  Route::delete('/jokes/{id}', 'App\Http\Controllers\JokeController@destroy');
-  Route::post('/jokes/{id}/vote', 'App\Http\Controllers\JokeController@vote');
+  Route::post('/jokes/create', 'App\Http\Controllers\Api\JokeController@create');
+  Route::delete('/jokes/{id}', 'App\Http\Controllers\Api\JokeController@destroy');
+  Route::post('/jokes/{id}/vote', 'App\Http\Controllers\Api\JokeController@vote');
 });
