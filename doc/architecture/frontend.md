@@ -9,17 +9,18 @@ Next.js 14 App Routerを採用し、MUI (Material-UI) をUIコンポーネント
 
 ### フレームワーク・ライブラリ
 
-| パッケージ | バージョン | 用途 |
-|-----------|-----------|------|
-| next | 14.0.4 | Reactフレームワーク |
-| react / react-dom | ^18 | UIライブラリ |
-| typescript | ^5 | 型安全な開発 |
-| @mui/material | ^7.0.1 | UIコンポーネント |
-| @mui/icons-material | ^7.0.1 | アイコン |
-| @emotion/react | ^11.14.0 | CSS-in-JS |
-| @emotion/styled | ^11.14.0 | styled components |
-| tailwindcss | ^3.3.0 | ユーティリティCSS |
-| axios | ^1.6.3 | HTTPクライアント |
+| パッケージ            | バージョン | 用途                             |
+| --------------------- | ---------- | -------------------------------- |
+| next                  | 14.0.4     | Reactフレームワーク              |
+| react / react-dom     | ^18        | UIライブラリ                     |
+| typescript            | ^5         | 型安全な開発                     |
+| @tanstack/react-query | ^5.67.2    | サーバー状態管理・データフェッチ |
+| @mui/material         | ^7.0.1     | UIコンポーネント                 |
+| @mui/icons-material   | ^7.0.1     | アイコン                         |
+| @emotion/react        | ^11.14.0   | CSS-in-JS                        |
+| @emotion/styled       | ^11.14.0   | styled components                |
+| tailwindcss           | ^3.3.0     | ユーティリティCSS                |
+| axios                 | ^1.6.3     | HTTPクライアント                 |
 
 ## フォルダ構成
 
@@ -49,7 +50,16 @@ src/frontend/
 │   │   └── user/             # ユーザー関連コンポーネント
 │   │       └── Regist.tsx
 │   ├── lib/                  # ユーティリティ・ヘルパー
-│   │   └── auth.ts           # 認証関連関数・API通信
+│   │   ├── auth.ts           # 認証関連関数
+│   │   ├── fetch.tsx         # API通信関数（レガシー）
+│   │   └── api.ts            # API通信関数（React Query用）
+│   ├── hooks/                # カスタムフック
+│   │   ├── useAuth.ts        # 認証関連フック
+│   │   ├── useJokes.ts       # ボケ関連フック
+│   │   ├── useTopics.ts      # お題関連フック
+│   │   └── useCategories.ts  # カテゴリ関連フック
+│   ├── types/                # 型定義
+│   │   └── index.ts          # 共通型定義
 │   ├── css/                  # スタイルシート
 │   ├── auth/                 # 認証ページ
 │   │   ├── login/
@@ -83,46 +93,51 @@ src/frontend/
 本プロジェクトではアトミックデザインの考え方を採用し、コンポーネントを以下の階層で管理しています。
 
 ### Atoms（原子）
+
 最小単位のUIコンポーネント。MUIコンポーネントをラップしてカスタマイズ。
 
-| コンポーネント | 説明 | ベースコンポーネント |
-|--------------|------|-------------------|
-| Button | ボタン | MUI Button |
-| TextField | テキスト入力 | MUI TextField |
-| Typography | テキスト表示 | MUI Typography |
-| Box | レイアウトボックス | MUI Box |
-| Grid | グリッドレイアウト | MUI Grid |
+| コンポーネント | 説明               | ベースコンポーネント |
+| -------------- | ------------------ | -------------------- |
+| Button         | ボタン             | MUI Button           |
+| TextField      | テキスト入力       | MUI TextField        |
+| Typography     | テキスト表示       | MUI Typography       |
+| Box            | レイアウトボックス | MUI Box              |
+| Grid           | グリッドレイアウト | MUI Grid             |
 
 ### Molecules（分子）
+
 複数のAtomsを組み合わせた機能的なコンポーネント。
 
-| コンポーネント | 説明 |
-|--------------|------|
-| Card | カード表示 |
-| LoginButton | ログインボタン |
-| SearchField | 検索フィールド |
+| コンポーネント | 説明           |
+| -------------- | -------------- |
+| Card           | カード表示     |
+| LoginButton    | ログインボタン |
+| SearchField    | 検索フィールド |
 
 ### Organisms（有機体）
+
 複雑なUIを構成する大きなコンポーネント。
 
-| コンポーネント | 説明 |
-|--------------|------|
-| CardList | カードリスト表示 |
+| コンポーネント | 説明             |
+| -------------- | ---------------- |
+| CardList       | カードリスト表示 |
 
 ### Templates（テンプレート）
+
 ページ全体のレイアウトを定義。
 
-| コンポーネント | 説明 |
-|--------------|------|
-| MainLayout | メインレイアウト（Header + Content + Footer） |
+| コンポーネント | 説明                                          |
+| -------------- | --------------------------------------------- |
+| MainLayout     | メインレイアウト（Header + Content + Footer） |
 
 ### Layouts（レイアウト部品）
+
 ページ共通で使用するレイアウト部品。
 
-| コンポーネント | 説明 |
-|--------------|------|
-| Header | ヘッダー（ナビゲーション含む） |
-| Footer | フッター |
+| コンポーネント     | 説明                           |
+| ------------------ | ------------------------------ |
+| Header             | ヘッダー（ナビゲーション含む） |
+| Footer             | フッター                       |
 | LoginButtonWrapper | ログイン状態に応じたボタン表示 |
 
 ## UIコンポーネント
@@ -131,79 +146,146 @@ src/frontend/
 
 主要なMUIコンポーネントの使用箇所：
 
-| コンポーネント | 用途 |
-|--------------|------|
-| AppBar, Toolbar | ヘッダー |
-| Button, ButtonGroup | ボタン |
-| Card, CardContent, CardMedia, CardActions | カード表示 |
-| TextField | フォーム入力 |
-| Typography | テキスト |
-| Dialog, DialogTitle, DialogContent, DialogActions | モーダル |
-| Alert | アラート・通知 |
-| CircularProgress | ローディング |
-| Avatar | ユーザーアイコン |
-| Paper | コンテナ |
-| Stepper, Step, StepLabel | ステップウィザード |
-| Pagination | ページネーション |
-| Fab | フローティングアクションボタン |
-| Divider | 区切り線 |
-| Stack | レイアウト |
+| コンポーネント                                    | 用途                           |
+| ------------------------------------------------- | ------------------------------ |
+| AppBar, Toolbar                                   | ヘッダー                       |
+| Button, ButtonGroup                               | ボタン                         |
+| Card, CardContent, CardMedia, CardActions         | カード表示                     |
+| TextField                                         | フォーム入力                   |
+| Typography                                        | テキスト                       |
+| Dialog, DialogTitle, DialogContent, DialogActions | モーダル                       |
+| Alert                                             | アラート・通知                 |
+| CircularProgress                                  | ローディング                   |
+| Avatar                                            | ユーザーアイコン               |
+| Paper                                             | コンテナ                       |
+| Stepper, Step, StepLabel                          | ステップウィザード             |
+| Pagination                                        | ページネーション               |
+| Fab                                               | フローティングアクションボタン |
+| Divider                                           | 区切り線                       |
+| Stack                                             | レイアウト                     |
 
 ### アイコン
 
 @mui/icons-material を使用：
 
-| アイコン | 用途 |
-|---------|------|
-| Home | ホームナビゲーション |
-| ThumbUp | いいねボタン |
-| EmojiEmotions | ボケるボタン |
-| ArrowForward, ArrowBack | ナビゲーション |
-| Send | 送信ボタン |
-| CloudUpload | アップロードボタン |
-| AddCircle, AddCircleOutline | 追加ボタン |
-| ListAlt | リスト表示 |
+| アイコン                    | 用途                 |
+| --------------------------- | -------------------- |
+| Home                        | ホームナビゲーション |
+| ThumbUp                     | いいねボタン         |
+| EmojiEmotions               | ボケるボタン         |
+| ArrowForward, ArrowBack     | ナビゲーション       |
+| Send                        | 送信ボタン           |
+| CloudUpload                 | アップロードボタン   |
+| AddCircle, AddCircleOutline | 追加ボタン           |
+| ListAlt                     | リスト表示           |
 
 ## 認証
 
 ### 認証方式
+
 Laravel Sanctum の Personal Access Token を使用したトークンベース認証。
 
 ### 認証フロー
-1. ログイン時にAPIからトークンを取得
+
+1. ログイン/登録時にAPIからトークンを取得
 2. トークンをlocalStorageに保存
 3. API呼び出し時にAuthorizationヘッダーにトークンを付与
-4. 401エラー時は自動でログアウト＆ログインページへリダイレクト
-
-### キャッシュ機構
-- ユーザー情報は5分間localStorageにキャッシュ
-- 画面遷移ごとにAPIを呼ばず、キャッシュを優先
-- キャッシュ期限切れ or 強制リフレッシュ時のみAPIを呼び出し
 
 ### 認証関連関数（lib/auth.ts）
 
-| 関数 | 説明 |
-|------|------|
-| getToken() | localStorageからトークン取得 |
-| setToken(token) | トークンを保存 |
-| clearToken() | トークンとユーザーキャッシュを削除 |
-| setUserData(user) | ユーザー情報をキャッシュに保存 |
-| getUserData() | キャッシュからユーザー情報取得 |
-| authFetch(url, options) | 認証付きfetch（401時に自動ログアウト） |
-| login(email, password) | ログイン |
-| logout() | ログアウト |
-| register(username, email, password, password_confirmation) | 新規登録 |
-| getUser(forceRefresh, redirectOnUnauth) | ユーザー情報取得（キャッシュ優先） |
-| sendPasswordResetLink(email) | パスワードリセットメール送信 |
-| resetPassword(email, password, password_confirmation, token) | パスワードリセット |
-| updateProfile(userData) | プロフィール更新 |
+| 関数                                                         | 説明                         |
+| ------------------------------------------------------------ | ---------------------------- |
+| getToken()                                                   | localStorageからトークン取得 |
+| setToken(token)                                              | トークンを保存               |
+| clearToken()                                                 | トークンを削除               |
+| login(email, password)                                       | ログイン                     |
+| logout()                                                     | ログアウト                   |
+| register(username, email, password, password_confirmation)   | 新規登録                     |
+| getUser()                                                    | ユーザー情報取得             |
+| sendPasswordResetLink(email)                                 | パスワードリセットメール送信 |
+| resetPassword(email, password, password_confirmation, token) | パスワードリセット           |
+| updateProfile(userData)                                      | プロフィール更新             |
+
+## データフェッチ（React Query）
+
+TanStack Query（React Query）を使用してサーバー状態を管理しています。
+
+### 設定（providers.tsx）
+
+```typescript
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1分
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+```
+
+### カスタムフック一覧
+
+#### useAuth.ts（認証関連）
+
+| フック             | 説明                              |
+| ------------------ | --------------------------------- |
+| useUser()          | ユーザー情報取得（5分キャッシュ） |
+| useLogin()         | ログイン処理                      |
+| useLogout()        | ログアウト処理                    |
+| useUpdateProfile() | プロフィール更新                  |
+| useIsLoggedIn()    | ログイン状態確認                  |
+
+#### useJokes.ts（ボケ関連）
+
+| フック                                 | 説明                           |
+| -------------------------------------- | ------------------------------ |
+| useJokes(userId?)                      | ボケ一覧取得                   |
+| useJokesPaginated(page, sort, userId?) | ページネーション付きボケ一覧   |
+| useVoteJoke()                          | ボケへの投票（楽観的更新対応） |
+| useCreateJoke()                        | ボケ作成                       |
+
+#### useTopics.ts（お題関連）
+
+| フック           | 説明         |
+| ---------------- | ------------ |
+| useTopics(page?) | お題一覧取得 |
+| useTopic(id)     | お題詳細取得 |
+| useCreateTopic() | お題作成     |
+
+#### useCategories.ts（カテゴリ関連）
+
+| フック                 | 説明         |
+| ---------------------- | ------------ |
+| useCategories(search?) | カテゴリ検索 |
+
+### API関数（lib/api.ts）
+
+| 関数                        | 説明                         |
+| --------------------------- | ---------------------------- |
+| fetchJokes(params)          | ボケ一覧取得                 |
+| fetchJokesPaginated(params) | ページネーション付きボケ取得 |
+| voteJoke(jokeId)            | ボケへの投票                 |
+| createJoke(params)          | ボケ作成                     |
+| fetchTopics(page)           | お題一覧取得                 |
+| fetchTopic(id)              | お題詳細取得                 |
+| createTopic(formData)       | お題作成                     |
+| fetchCategories(search)     | カテゴリ検索                 |
 
 ## API通信
 
 ### 環境変数
 
-| 変数名 | 説明 |
-|--------|------|
-| NEXT_PUBLIC_API_URL | APIエンドポイントURL |
-| NEXT_PUBLIC_BACKEND_URL | バックエンドURL（画像表示用） |
-| NEXT_PUBLIC_BACKEND_CONTAINER_URL | コンテナ内バックエンドURL |
+| 変数名                            | 説明                          |
+| --------------------------------- | ----------------------------- |
+| NEXT_PUBLIC_API_URL               | APIエンドポイントURL          |
+| NEXT_PUBLIC_BACKEND_URL           | バックエンドURL（画像表示用） |
+| NEXT_PUBLIC_BACKEND_CONTAINER_URL | コンテナ内バックエンドURL     |
+
+### 通信関数（lib/fetch.tsx）
+
+| 関数                | 説明             |
+| ------------------- | ---------------- |
+| fetchPost(props)    | POST リクエスト  |
+| fetchGet(props)     | GET リクエスト   |
+| buildHeaders(extra) | 認証ヘッダー生成 |

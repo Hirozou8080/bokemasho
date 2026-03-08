@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getUser, updateProfile } from "@/app/lib/auth";
 import MainLayout from "@/app/components/templates/MainLayout";
 import {
   Box,
@@ -13,10 +12,6 @@ import {
   TextField,
   Alert,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 import Typography from "@/app/components/atoms/Typography";
@@ -28,25 +23,9 @@ import ReactCrop, {
   makeAspectCrop,
 } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
+import { useUser, useUpdateProfile } from "@/app/hooks/useAuth";
 
 const DEFAULT_ICON = "/images/robot-logo.png";
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-  "image/heic",
-  "image/heif",
-];
-
-interface User {
-  uid?: number;
-  username: string;
-  email: string;
-  icon_url?: string;
-  bio?: string;
-}
 
 function centerAspectCrop(
   mediaWidth: number,
@@ -70,13 +49,15 @@ function centerAspectCrop(
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+
+  // React Query フック
+  const { data: user, isLoading } = useUser();
+  const updateProfileMutation = useUpdateProfile();
+
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconPreview, setIconPreview] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -88,139 +69,31 @@ export default function EditProfilePage() {
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const imgRef = useRef<HTMLImageElement>(null);
 
+  // ユーザーデータが読み込まれたらフォームに反映
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await getUser();
-        if (response && response.user) {
-          setUser(response.user);
-          setUsername(response.user.username || "");
-          setBio(response.user.bio || "");
-          setIconPreview(response.user.icon_url || DEFAULT_ICON);
-        } else {
-          router.push("/auth/login");
-        }
-      } catch (err) {
-        setError("プロフィール情報の取得に失敗しました");
-        console.error("Failed to fetch user data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (user) {
+      setUsername(user.username || "");
+      setBio(user.bio || "");
+      setIconPreview(user.icon_url || DEFAULT_ICON);
+    }
+  }, [user]);
 
-    fetchUserData();
-  }, [router]);
-
-  const onImageLoad = useCallback(
-    (e: React.SyntheticEvent<HTMLImageElement>) => {
-      const { width, height } = e.currentTarget;
-      setCrop(centerAspectCrop(width, height, 1));
-    },
-    [],
-  );
+  // 未ログインの場合はログインページにリダイレクト
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/auth/login");
+    }
+  }, [isLoading, user, router]);
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    // ファイルサイズチェック
-    if (file.size > MAX_FILE_SIZE) {
-      setError(
-        `ファイルサイズが大きすぎます（${(file.size / 1024 / 1024).toFixed(1)}MB）。10MB以下のファイルを選択してください。`,
-      );
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-      return;
-    }
-
-    // ファイル形式チェック
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      setError(
-        `対応していないファイル形式です。対応形式: JPEG, PNG, GIF, WebP, HEIC`,
-      );
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-      return;
-    }
-
-    setError("");
-
-    // 画像をData URLとして読み込み、トリミングダイアログを開く
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImageSrc(reader.result as string);
-      setCropDialogOpen(true);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const getCroppedImage = useCallback(async (): Promise<File | null> => {
-    if (!imgRef.current || !completedCrop) return null;
-
-    const image = imgRef.current;
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
-
-    canvas.width = completedCrop.width * scaleX;
-    canvas.height = completedCrop.height * scaleY;
-
-    ctx.drawImage(
-      image,
-      completedCrop.x * scaleX,
-      completedCrop.y * scaleY,
-      completedCrop.width * scaleX,
-      completedCrop.height * scaleY,
-      0,
-      0,
-      canvas.width,
-      canvas.height,
-    );
-
-    return new Promise((resolve) => {
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            const file = new File([blob], "icon.jpg", { type: "image/jpeg" });
-            resolve(file);
-          } else {
-            resolve(null);
-          }
-        },
-        "image/jpeg",
-        0.9,
-      );
-    });
-  }, [completedCrop]);
-
-  const handleCropConfirm = async () => {
-    const croppedFile = await getCroppedImage();
-    if (croppedFile) {
-      setIconFile(croppedFile);
-      // トリミング後のプレビューを生成
+    if (file) {
+      setIconFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setIconPreview(reader.result as string);
       };
-      reader.readAsDataURL(croppedFile);
-    }
-    setCropDialogOpen(false);
-    setImageSrc("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleCropCancel = () => {
-    setCropDialogOpen(false);
-    setImageSrc("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      reader.readAsDataURL(file);
     }
   };
 
@@ -230,37 +103,30 @@ export default function EditProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     setError("");
     setSuccess(false);
 
-    try {
-      const updatedData: { username: string; bio: string; icon?: File } = {
-        username,
-        bio,
-      };
+    const updatedData: { username: string; bio: string; icon?: File } = {
+      username,
+      bio,
+    };
 
-      if (iconFile) {
-        updatedData.icon = iconFile;
-      }
-
-      const result = await updateProfile(updatedData);
-      console.log(result);
-      if (result && result.data) {
-        setSuccess(true);
-        setUser(result.data);
-        router.push("/profile");
-      }
-      console.log("プロフィールを更新しました");
-    } catch (err) {
-      setError("プロフィールの更新に失敗しました");
-      console.error("Failed to update profile:", err);
-    } finally {
-      setSaving(false);
+    if (iconFile) {
+      updatedData.icon = iconFile;
     }
+
+    updateProfileMutation.mutate(updatedData, {
+      onSuccess: () => {
+        setSuccess(true);
+        router.push("/profile");
+      },
+      onError: () => {
+        setError("プロフィールの更新に失敗しました");
+      },
+    });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <MainLayout>
         <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
@@ -390,7 +256,7 @@ export default function EditProfilePage() {
               <Button
                 variant="outlined"
                 onClick={() => router.push("/profile")}
-                disabled={saving}
+                disabled={updateProfileMutation.isPending}
               >
                 キャンセル
               </Button>
@@ -398,54 +264,14 @@ export default function EditProfilePage() {
                 type="submit"
                 variant="contained"
                 color="primary"
-                disabled={saving}
+                disabled={updateProfileMutation.isPending}
               >
-                {saving ? <CircularProgress size={24} /> : "保存する"}
+                {updateProfileMutation.isPending ? <CircularProgress size={24} /> : "保存する"}
               </Button>
             </Box>
           </Box>
         </Paper>
       </Box>
-
-      {/* トリミングダイアログ */}
-      <Dialog
-        open={cropDialogOpen}
-        onClose={handleCropCancel}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>画像をトリミング</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            アイコンとして使用する部分を選択してください
-          </Typography>
-          {imageSrc && (
-            <Box sx={{ display: "flex", justifyContent: "center" }}>
-              <ReactCrop
-                crop={crop}
-                onChange={(c) => setCrop(c)}
-                onComplete={(c) => setCompletedCrop(c)}
-                aspect={1}
-                circularCrop
-              >
-                <img
-                  ref={imgRef}
-                  src={imageSrc}
-                  alt="トリミング用画像"
-                  onLoad={onImageLoad}
-                  style={{ maxHeight: "60vh", maxWidth: "100%" }}
-                />
-              </ReactCrop>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCropCancel}>キャンセル</Button>
-          <Button onClick={handleCropConfirm} variant="contained">
-            適用
-          </Button>
-        </DialogActions>
-      </Dialog>
     </MainLayout>
   );
 }

@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getUser } from "@/app/lib/auth";
 import MainLayout from "@/app/components/templates/MainLayout";
 import {
   Box,
@@ -13,45 +12,22 @@ import {
   Divider,
 } from "@mui/material";
 import Typography from "@/app/components/atoms/Typography";
+import { useUser } from "@/app/hooks/useAuth";
 
 const DEFAULT_ICON = "/images/robot-logo.png";
 
-interface User {
-  uid?: number;
-  username: string;
-  email: string;
-  icon_url?: string;
-  bio?: string;
-}
-
 export default function ProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { data: user, isLoading, error } = useUser();
 
+  // 未ログインの場合はログインページにリダイレクト
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await getUser();
-        if (response && response.user) {
-          setUser(response.user);
-        } else {
-          // ユーザーデータがない場合はログインページにリダイレクト
-          router.push("/auth/login");
-        }
-      } catch (err) {
-        setError("プロフィール情報の取得に失敗しました");
-        console.error("Failed to fetch user data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!isLoading && !user) {
+      router.push("/auth/login");
+    }
+  }, [isLoading, user, router]);
 
-    fetchUserData();
-  }, [router]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <MainLayout>
         <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
@@ -66,7 +42,7 @@ export default function ProfilePage() {
       <MainLayout>
         <Box sx={{ mt: 4, textAlign: "center" }}>
           <Typography variant="h6" color="error">
-            {error}
+            プロフィール情報の取得に失敗しました
           </Typography>
           <Button
             variant="contained"

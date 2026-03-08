@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getUser, getToken } from "@/app/lib/auth";
 import MainLayout from "@/app/components/templates/MainLayout";
 import {
   Box,
@@ -22,163 +21,71 @@ import {
 import { Send } from "@mui/icons-material";
 import Link from "next/link";
 import TopicDetailSkeleton from "@/app/components/molecules/TopicDetailSkeleton";
-
-interface JokeTopic {
-  id: number;
-  user_id: number;
-  image_path: string;
-  priority: number;
-  created_at: string;
-  updated_at: string;
-  user: {
-    username: string;
-    avatar?: string;
-  };
-}
+import { useTopic } from "@/app/hooks/useTopics";
+import { useCategories } from "@/app/hooks/useCategories";
+import { useCreateJoke } from "@/app/hooks/useJokes";
+import { useUser } from "@/app/hooks/useAuth";
 
 export default function JokeResponsePage() {
   const router = useRouter();
   const params = useParams();
-  const topicId = params?.id as string;
+  const topicId = Number(params?.id);
 
-  const [topic, setTopic] = useState<JokeTopic | null>(null);
   const [jokeText, setJokeText] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
-  const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   const [categoryInput, setCategoryInput] = useState("");
-  const [dataLoading, setDataLoading] = useState(true);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // ページ全体のローディング状態を計算
-  const loading = dataLoading || authLoading;
+  // React Query フック
+  const { data: topic, isLoading: topicLoading, error: topicError } = useTopic(topicId);
+  const { data: user, isLoading: authLoading } = useUser();
+  const { data: categoryData } = useCategories(categoryInput || undefined);
+  const createJokeMutation = useCreateJoke();
 
+  const isLoggedIn = !!user;
+  const loading = topicLoading || authLoading;
+  const categoryOptions = categoryData?.map((cat) => cat.name) ?? [];
+
+  // カテゴリ入力のデバウンス
+  const [debouncedCategoryInput, setDebouncedCategoryInput] = useState("");
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await getUser();
-        if (response && response.user) {
-          setIsLoggedIn(true);
-        } else {
-          setIsLoggedIn(false);
-        }
-      } catch (err) {
-        console.error("Failed to fetch user data:", err);
-        setIsLoggedIn(false);
-      } finally {
-        setAuthLoading(false);
-      }
-    };
-
-    const fetchTopic = async () => {
-      try {
-        const API_URL =
-          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
-        const response = await fetch(`${API_URL}/joke-topics/${topicId}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("お題の取得に失敗しました");
-        }
-
-        const data = await response.json();
-        setTopic(data.data);
-      } catch (err) {
-        console.error("Failed to fetch topic:", err);
-        setError("お題の取得に失敗しました");
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    checkAuth();
-    fetchTopic();
-  }, [topicId]);
-
-  // カテゴリのサジェスト取得
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const API_URL =
-          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
-        const searchParam = categoryInput ? `?search=${encodeURIComponent(categoryInput)}` : "";
-        const response = await fetch(`${API_URL}/categories${searchParam}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setCategoryOptions(data.data.map((cat: { name: string }) => cat.name));
-        }
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-      }
-    };
-
-    const debounceTimer = setTimeout(fetchCategories, 300);
-    return () => clearTimeout(debounceTimer);
+    const timer = setTimeout(() => {
+      setDebouncedCategoryInput(categoryInput);
+    }, 300);
+    return () => clearTimeout(timer);
   }, [categoryInput]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
     setError("");
     setSuccess(false);
 
     if (!jokeText.trim()) {
       setError("ボケを入力してください");
-      setSubmitting(false);
       return;
     }
 
-    try {
-      // APIエンドポイントのベースURL
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
-
-      const response = await fetch(`${API_URL}/jokes/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
+    createJokeMutation.mutate(
+      {
+        topic_id: topicId,
+        content: jokeText,
+        categories: categories,
+      },
+      {
+        onSuccess: () => {
+          setSuccess(true);
+          setJokeText("");
+          setCategories([]);
+          setTimeout(() => {
+            router.push("/jokes");
+          }, 1500);
         },
-        body: JSON.stringify({
-          topic_id: topicId,
-          content: jokeText,
-          categories: categories,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "ボケの投稿に失敗しました");
+        onError: () => {
+          setError("ボケの投稿に失敗しました");
+        },
       }
-
-      setSuccess(true);
-      setJokeText("");
-      setCategories([]);
-
-      // 成功後1.5秒後にボケ一覧ページに遷移
-      setTimeout(() => {
-        router.push("/jokes");
-      }, 1500);
-    } catch (err) {
-      console.error("Failed to submit joke:", err);
-      setError("ボケの投稿に失敗しました");
-    } finally {
-      setSubmitting(false);
-    }
+    );
   };
 
   if (loading) {
@@ -190,7 +97,7 @@ export default function JokeResponsePage() {
   }
 
   // お題が見つからない場合
-  if (!topic) {
+  if (topicError || !topic) {
     return (
       <MainLayout>
         <Box sx={{ textAlign: "center", mt: 8 }}>
@@ -412,10 +319,10 @@ export default function JokeResponsePage() {
                 type="submit"
                 variant="contained"
                 color="primary"
-                disabled={submitting || !jokeText.trim()}
+                disabled={createJokeMutation.isPending || !jokeText.trim()}
                 startIcon={<Send />}
               >
-                {submitting ? <CircularProgress size={24} /> : "ボケを投稿"}
+                {createJokeMutation.isPending ? <CircularProgress size={24} /> : "ボケを投稿"}
               </Button>
             </Box>
           </Box>
