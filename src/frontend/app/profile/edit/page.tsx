@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getUser, updateProfile } from "@/app/lib/auth";
 import MainLayout from "@/app/components/templates/MainLayout";
 import {
   Box,
@@ -17,53 +16,74 @@ import {
 import { PhotoCamera } from "@mui/icons-material";
 import Typography from "@/app/components/atoms/Typography";
 import TextInput from "@/app/components/atoms/TextField";
+import ReactCrop, {
+  Crop,
+  PixelCrop,
+  centerCrop,
+  makeAspectCrop,
+} from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
+import { useUser, useUpdateProfile } from "@/app/hooks/useAuth";
 
 const DEFAULT_ICON = "/images/robot-logo.png";
 
-interface User {
-  uid?: number;
-  username: string;
-  email: string;
-  icon_url?: string;
-  bio?: string;
+function centerAspectCrop(
+  mediaWidth: number,
+  mediaHeight: number,
+  aspect: number,
+) {
+  return centerCrop(
+    makeAspectCrop(
+      {
+        unit: "%",
+        width: 90,
+      },
+      aspect,
+      mediaWidth,
+      mediaHeight,
+    ),
+    mediaWidth,
+    mediaHeight,
+  );
 }
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+
+  // React Query フック
+  const { data: user, isLoading } = useUser();
+  const updateProfileMutation = useUpdateProfile();
+
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [iconPreview, setIconPreview] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await getUser();
-        if (response && response.user) {
-          setUser(response.user);
-          setUsername(response.user.username || "");
-          setBio(response.user.bio || "");
-          setIconPreview(response.user.icon_url || DEFAULT_ICON);
-        } else {
-          // ユーザーデータがない場合はログインページにリダイレクト
-          router.push("/auth/login");
-        }
-      } catch (err) {
-        setError("プロフィール情報の取得に失敗しました");
-        console.error("Failed to fetch user data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Crop states
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string>("");
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  const imgRef = useRef<HTMLImageElement>(null);
 
-    fetchUserData();
-  }, [router]);
+  // ユーザーデータが読み込まれたらフォームに反映
+  useEffect(() => {
+    if (user) {
+      setUsername(user.username || "");
+      setBio(user.bio || "");
+      setIconPreview(user.icon_url || DEFAULT_ICON);
+    }
+  }, [user]);
+
+  // 未ログインの場合はログインページにリダイレクト
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/auth/login");
+    }
+  }, [isLoading, user, router]);
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -83,38 +103,30 @@ export default function EditProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     setError("");
     setSuccess(false);
 
-    try {
-      const updatedData: { username: string; bio: string; icon?: File } = {
-        username,
-        bio,
-      };
+    const updatedData: { username: string; bio: string; icon?: File } = {
+      username,
+      bio,
+    };
 
-      if (iconFile) {
-        updatedData.icon = iconFile;
-      }
-
-      const result = await updateProfile(updatedData);
-      console.log(result);
-      if (result && result.data) {
-        setSuccess(true);
-        // 更新されたユーザー情報を反映
-        setUser(result.data);
-        router.push("/profile");
-      }
-      console.log("プロフィールを更新しました");
-    } catch (err) {
-      setError("プロフィールの更新に失敗しました");
-      console.error("Failed to update profile:", err);
-    } finally {
-      setSaving(false);
+    if (iconFile) {
+      updatedData.icon = iconFile;
     }
+
+    updateProfileMutation.mutate(updatedData, {
+      onSuccess: () => {
+        setSuccess(true);
+        router.push("/profile");
+      },
+      onError: () => {
+        setError("プロフィールの更新に失敗しました");
+      },
+    });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <MainLayout>
         <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
@@ -244,7 +256,7 @@ export default function EditProfilePage() {
               <Button
                 variant="outlined"
                 onClick={() => router.push("/profile")}
-                disabled={saving}
+                disabled={updateProfileMutation.isPending}
               >
                 キャンセル
               </Button>
@@ -252,9 +264,9 @@ export default function EditProfilePage() {
                 type="submit"
                 variant="contained"
                 color="primary"
-                disabled={saving}
+                disabled={updateProfileMutation.isPending}
               >
-                {saving ? <CircularProgress size={24} /> : "保存する"}
+                {updateProfileMutation.isPending ? <CircularProgress size={24} /> : "保存する"}
               </Button>
             </Box>
           </Box>

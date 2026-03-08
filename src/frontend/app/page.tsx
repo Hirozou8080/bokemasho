@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import MainLayout from "./components/templates/MainLayout";
 import Typography from "./components/atoms/Typography";
-import { getUser, getToken } from "@/app/lib/auth";
 import { Box, Button } from "@mui/material";
 import { EmojiEmotions, ArrowForward } from "@mui/icons-material";
 import Link from "next/link";
@@ -13,204 +12,32 @@ import TopicCard from "./components/molecules/TopicCard";
 import TopicCardSkeleton from "./components/molecules/TopicCardSkeleton";
 import LoginRequiredDialog from "./components/molecules/LoginRequiredDialog";
 import CardGrid from "./components/organisms/CardGrid";
-
-interface Category {
-  id: number;
-  name: string;
-}
-
-interface Joke {
-  id: number;
-  content: string;
-  votes_count: number;
-  created_at: string;
-  has_voted: boolean;
-  user: {
-    username: string;
-    icon_url?: string;
-  };
-  topic: {
-    id: number;
-    image_path: string;
-  };
-  categories?: Category[];
-}
-
-interface JokeTopic {
-  id: number;
-  user_id: number;
-  image_path: string;
-  priority: number;
-  created_at: string;
-  updated_at: string;
-  user: {
-    username: string;
-    icon_url?: string;
-  };
-}
-
-interface User {
-  id: number;
-  username: string;
-}
+import { useUser } from "./hooks/useAuth";
+import { useJokes, useVoteJoke } from "./hooks/useJokes";
+import { useTopics } from "./hooks/useTopics";
 
 export default function Home() {
-  const [jokes, setJokes] = useState<Joke[]>([]);
-  const [topics, setTopics] = useState<JokeTopic[]>([]);
-  const [jokesLoading, setJokesLoading] = useState(true);
-  const [topicsLoading, setTopicsLoading] = useState(true);
-  const [jokesError, setJokesError] = useState("");
-  const [topicsError, setTopicsError] = useState("");
-  const [user, setUser] = useState<User | null>(null);
   const [openModal, setOpenModal] = useState(false);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const response = await getUser();
-      if (response && response.user) {
-        setUser(response.user);
-      }
-    };
+  // React Query フック
+  const { data: user } = useUser();
+  const { data: jokes = [], isLoading: jokesLoading, error: jokesError } = useJokes(user?.id);
+  const { data: topicsData, isLoading: topicsLoading, error: topicsError } = useTopics();
+  const voteMutation = useVoteJoke();
 
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    const fetchJokes = async () => {
-      try {
-        const API_URL =
-          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
-        const url = user
-          ? `${API_URL}/jokes?user_id=${user.id}`
-          : `${API_URL}/jokes`;
-        const response = await fetch(url, {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("ボケの取得に失敗しました");
-        }
-
-        const responseText = await response.text();
-        let data;
-
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error("JSON parse error:", parseError, responseText);
-          throw new Error("レスポンスの解析に失敗しました");
-        }
-
-        if (Array.isArray(data.data.data)) {
-          setJokes(data.data.data);
-        } else if (Array.isArray(data.data)) {
-          setJokes(data.data);
-        } else {
-          console.error("API data is not an array:", data);
-          setJokes([]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch jokes:", err);
-        setJokesError(
-          err instanceof Error ? err.message : "ボケの取得に失敗しました"
-        );
-      } finally {
-        setJokesLoading(false);
-      }
-    };
-
-    const fetchTopics = async () => {
-      try {
-        const API_URL =
-          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
-        const response = await fetch(`${API_URL}/joke-topics`, {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("ボケお題の取得に失敗しました");
-        }
-
-        const responseText = await response.text();
-        let data;
-
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error("JSON parse error:", parseError, responseText);
-          throw new Error("レスポンスの解析に失敗しました");
-        }
-
-        if (Array.isArray(data.data.data)) {
-          setTopics(data.data.data);
-        } else {
-          console.error("API data is not an array:", data.data.data);
-          setTopics([]);
-          setTopicsError("データの形式が正しくありません");
-        }
-      } catch (err) {
-        console.error("Failed to fetch topics:", err);
-        setTopicsError(
-          err instanceof Error ? err.message : "ボケお題の取得に失敗しました"
-        );
-      } finally {
-        setTopicsLoading(false);
-      }
-    };
-
-    fetchJokes();
-    fetchTopics();
-  }, [user]);
+  const topics = topicsData?.data ?? [];
 
   // 投票処理
-  const handleVote = async (jokeId: number) => {
+  const handleVote = (jokeId: number) => {
     if (!user) {
       setOpenModal(true);
       return;
     }
-    try {
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
-
-      const response = await fetch(`${API_URL}/jokes/${jokeId}/vote`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("投票に失敗しました");
-      }
-
-      const data = await response.json();
-
-      // 投票状態を更新
-      setJokes((prevJokes) =>
-        prevJokes.map((joke) =>
-          joke.id === jokeId
-            ? {
-                ...joke,
-                votes_count: data.vote_count,
-                has_voted: data.has_voted,
-              }
-            : joke
-        )
-      );
-    } catch (err) {
-      console.error("Failed to vote:", err);
-      alert(err instanceof Error ? err.message : "投票に失敗しました");
-    }
+    voteMutation.mutate(jokeId, {
+      onError: (err) => {
+        alert(err instanceof Error ? err.message : "投票に失敗しました");
+      },
+    });
   };
 
   return (
@@ -281,7 +108,7 @@ export default function Home() {
         <CardGrid
           items={jokes.slice(0, 6)}
           loading={jokesLoading}
-          error={jokesError}
+          error={jokesError?.message || ""}
           emptyMessage="まだボケがありません"
           skeletonCount={6}
           renderItem={(joke) => <JokeCard joke={joke} onVote={handleVote} />}
@@ -315,7 +142,7 @@ export default function Home() {
         <CardGrid
           items={topics.slice(0, 3)}
           loading={topicsLoading}
-          error={topicsError}
+          error={topicsError?.message || ""}
           emptyMessage="まだボケお題がありません"
           skeletonCount={3}
           renderItem={(topic) => <TopicCard topic={topic} />}

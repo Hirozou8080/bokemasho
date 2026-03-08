@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import ThemeRegistry from "./theme-registry";
+import Providers from "./providers";
 import { Metadata, Viewport } from "next";
 import icon from "@/public/images/robot-logo.png";
 import Script from "next/script";
@@ -102,7 +103,9 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={inter.className}>
-        <ThemeRegistry>{children}</ThemeRegistry>
+        <Providers>
+          <ThemeRegistry>{children}</ThemeRegistry>
+        </Providers>
       </body>
     </html>
   );

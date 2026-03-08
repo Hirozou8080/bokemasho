@@ -1,65 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import MainLayout from "@/app/components/templates/MainLayout";
 import { Box, Typography } from "@mui/material";
 import TopicCard from "@/app/components/molecules/TopicCard";
 import TopicCardSkeleton from "@/app/components/molecules/TopicCardSkeleton";
 import CardGrid from "@/app/components/organisms/CardGrid";
-
-interface JokeTopic {
-  id: number;
-  user_id: number;
-  image_path: string;
-  priority: number;
-  created_at: string;
-  updated_at: string;
-  user: {
-    username: string;
-    avatar?: string;
-  };
-}
+import { useTopics } from "@/app/hooks/useTopics";
 
 export default function JokeTopicListPage() {
-  const [topics, setTopics] = useState<JokeTopic[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { data, isLoading, error } = useTopics();
 
-  useEffect(() => {
-    const fetchTopics = async () => {
-      try {
-        const API_URL =
-          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.100:8080/api";
-        const response = await fetch(`${API_URL}/joke-topics`, {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("ボケお題の取得に失敗しました");
-        }
-
-        const data = await response.json();
-        if (Array.isArray(data.data.data)) {
-          setTopics(data.data.data);
-        } else {
-          console.error("API data is not an array:", data.data.data);
-          setTopics([]);
-          setError("データの形式が正しくありません");
-        }
-      } catch (err) {
-        console.error("Failed to fetch topics:", err);
-        setError("ボケお題の取得に失敗しました");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTopics();
-  }, []);
+  const topics = data?.data ?? [];
+  const errorMessage = error ? "ボケお題の取得に失敗しました" : "";
 
   return (
     <MainLayout>
@@ -77,8 +29,8 @@ export default function JokeTopicListPage() {
 
         <CardGrid
           items={topics}
-          loading={loading}
-          error={error}
+          loading={isLoading}
+          error={errorMessage}
           emptyMessage="まだボケお題がありません"
           skeletonCount={6}
           renderItem={(topic) => <TopicCard topic={topic} />}
