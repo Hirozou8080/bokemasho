@@ -57,6 +57,41 @@ const isCacheValid = (): boolean => {
 export const clearUserData = () => {
   if (typeof window === "undefined") return;
   localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(USER_CACHE_TIME_KEY);
+};
+
+// 401エラー時の共通ハンドリング（トークン切れ対応）
+const handleUnauthorized = () => {
+  clearToken();
+  // ログインページへリダイレクト（現在のURLをreturnUrlとして保持）
+  if (typeof window !== "undefined") {
+    const currentPath = window.location.pathname;
+    if (currentPath !== "/login" && currentPath !== "/register") {
+      window.location.href = `/login?returnUrl=${encodeURIComponent(currentPath)}`;
+    }
+  }
+};
+
+// 認証付きfetchのラッパー（401時に自動ログアウト）
+export const authFetch = async (
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> => {
+  const token = getToken();
+  const headers: HeadersInit = {
+    Accept: "application/json",
+    ...options.headers,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  const response = await fetch(url, { ...options, headers });
+
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error("認証が切れました。再度ログインしてください。");
+  }
+
+  return response;
 };
 
 // 認証ヘッダー生成
@@ -109,23 +144,38 @@ export const login = async (email: string, password: string): Promise<any> => {
 
 // ログアウト
 export const logout = async (): Promise<any> => {
-  const response = await fetch(`${API_URL}/logout`, {
-    method: "POST",
-    headers: jsonHeaders(),
-  });
+  try {
+    const response = await fetch(`${API_URL}/logout`, {
+      method: "POST",
+      headers: jsonHeaders(),
+    });
 
-  clearToken();
+    // ログアウトは成功・失敗に関わらずローカルのトークンをクリア
+    clearToken();
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "ログアウトに失敗しました");
+    if (!response.ok) {
+      // 401の場合は既にトークンが無効なので正常終了扱い
+      if (response.status === 401) {
+        return { message: "ログアウトしました" };
+      }
+      const error = await response.json();
+      throw new Error(error.message || "ログアウトに失敗しました");
+    }
+
+    return response.json();
+  } catch (error) {
+    // ネットワークエラー等でもローカルのトークンはクリア済み
+    clearToken();
+    throw error;
   }
-
-  return response.json();
 };
 
 // ユーザー情報取得（キャッシュ優先、5分で期限切れ）
-export const getUser = async (forceRefresh = false): Promise<any> => {
+// redirectOnUnauth: trueの場合、401エラー時にログインページへリダイレクト
+export const getUser = async (
+  forceRefresh = false,
+  redirectOnUnauth = false
+): Promise<any> => {
   // キャッシュがあり、有効期限内で、強制リフレッシュでなければキャッシュを返す
   if (!forceRefresh && isCacheValid()) {
     const cachedUser = getUserData();
@@ -148,6 +198,9 @@ export const getUser = async (forceRefresh = false): Promise<any> => {
     // 認証エラーの場合はキャッシュもクリア
     if (response.status === 401) {
       clearToken();
+      if (redirectOnUnauth) {
+        handleUnauthorized();
+      }
     }
     return null;
   }
@@ -262,13 +315,9 @@ export const updateProfile = async (userData: {
     formData.append("icon", userData.icon);
   }
 
-  const token = getToken();
-  const response = await fetch(`${API_URL}/profile`, {
+  // authFetchを使って401時の自動ログアウトに対応
+  const response = await authFetch(`${API_URL}/profile`, {
     method: "POST",
-    headers: {
-      Accept: "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
     body: formData,
   });
 

@@ -14,7 +14,6 @@ return [
     | and production domains which access your API via a frontend SPA.
     |
     */
-    // @todo トークン認証にしたい
     'stateful' => explode(',', env(
         'SANCTUM_STATEFUL_DOMAINS',
         'localhost:3000,127.0.0.1:3000,127.0.0.100:3000,localhost:8080,127.0.0.1:8080,127.0.0.100:8080'
@@ -45,7 +44,7 @@ return [
     |
     */
 
-    'expiration' => null,
+    'expiration' => env('SANCTUM_TOKEN_EXPIRATION', 60 * 24 * 7), // 7日間（分単位）
 
     /*
     |--------------------------------------------------------------------------

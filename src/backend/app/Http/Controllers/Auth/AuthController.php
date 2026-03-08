@@ -7,10 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-use Illuminate\Support\Facades\{
-    Auth,
-    Hash
-};
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -29,11 +26,8 @@ class AuthController extends Controller
             ]);
         }
 
-        Auth::login($user);
-
         // メールアドレスが確認されているかチェック
         if (!$user->hasVerifiedEmail()) {
-            Auth::logout();
             return response()->json([
                 'message' => 'メールアドレスが確認されていません。メールに送信された確認リンクをクリックしてください。',
                 'email_verified' => false,
